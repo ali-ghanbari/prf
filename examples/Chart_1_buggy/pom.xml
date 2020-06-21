@@ -1,0 +1,194 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>org.jfree</groupId>
+  <artifactId>jfreechart2</artifactId>
+  <packaging>jar</packaging>
+  <version>2.0-pre1</version>
+  <name>JFreeChart2</name>
+  <url>http://www.jfree.org/jfreechart/index.html</url>
+
+  <build>
+    <sourceDirectory>source</sourceDirectory>
+    <testSourceDirectory>tests</testSourceDirectory>
+    <resources>
+      <resource>
+        <directory>source/resources</directory>
+      </resource>
+    </resources>
+    <plugins>
+
+      <plugin>
+        <artifactId>maven-antrun-plugin</artifactId>
+        <version>1.7</version>
+        <executions>
+          <execution>
+            <id>ant-execute</id>
+            <configuration>
+              <target>
+                
+                <!-- copy across gorilla.jpg -->
+                <copy file="${basedir}/src/main/java/org/jfree/chart/gorilla.jpg" tofile="${basedir}/target/classes/org/jfree/chart/gorilla.jpg" />
+                
+                <!-- copy across .properties files -->
+                <copy todir="${basedir}/target/classes/org/jfree/chart/">
+                  <fileset dir="${basedir}/src/main/java/org/jfree/chart">
+                    <include name="*.properties" />
+                  </fileset>
+                </copy>
+                <copy todir="${basedir}/target/classes/org/jfree/chart/plot">
+                  <fileset dir="${basedir}/src/main/java/org/jfree/chart/plot">
+                    <include name="*.properties" />
+                  </fileset>
+                </copy>
+                <copy todir="${basedir}/target/classes/org/jfree/chart/editor">
+                  <fileset dir="${basedir}/src/main/java/org/jfree/chart/editor">
+                    <include name="*.properties" />
+                  </fileset>
+                </copy>
+                <copy todir="${basedir}/target/classes/org/jfree/chart/ui">
+                  <fileset dir="${basedir}/src/main/java/org/jfree/chart/ui">
+                    <include name="*.properties" />
+                  </fileset>
+                </copy>
+              </target>
+            </configuration>
+            <goals>
+              <goal>run</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+
+      <plugin>
+        <groupId>edu.utdallas</groupId>
+        <artifactId>prf-maven-plugin</artifactId>
+        <version>1.0-SNAPSHOT</version>
+        <configuration>
+	  <patchGenerationPlugin>
+	    <name>capgen</name>
+	    <launcherJDKHomeDirectory>/Library/Java/JavaVirtualMachines/jdk1.8.0_231.jdk/Contents/Home</launcherJDKHomeDirectory>
+	    <parameters>
+	      <subject>Chart</subject>
+	      <bugId>1</bugId>
+	    </parameters>
+	  </patchGenerationPlugin>
+	  <parallelism>8</parallelism>
+          <whiteListPrefix>org.jfree</whiteListPrefix>
+          <failingTests>
+            <failingTest>org.jfree.chart.renderer.category.junit.AbstractCategoryItemRendererTests:test2947660</failingTest>
+          </failingTests>
+        </configuration>
+	<dependencies>
+	  <dependency>
+	    <groupId>edu.utdallas</groupId>
+	    <artifactId>capgen-prf-plugin</artifactId>
+	    <version>1.0-SNAPSHOT</version>
+	  </dependency>
+	</dependencies>
+      </plugin>
+      
+    <plugin>
+                <groupId>org.mudebug</groupId>
+                <artifactId>prapr-plugin</artifactId><version>2.0.0</version>
+                <configuration>
+                    <targetClasses>
+                        <param>org.jfree.*</param>
+                    </targetClasses>
+                   <targetTests>
+ <param>*PackageTests</param>
+</targetTests>
+<threads>1</threads><!-- -->
+                        <mutators><mutator>ALL</mutator></mutators>
+                        <outputFormats>
+                          <!-- <param>COMPRESSED-XML</param> -->
+                          <param>LOG</param>
+                        <!--<param>html</param>-->
+                        </outputFormats>
+                        <failingTests>
+                        <failingTest>
+                        org.jfree.chart.renderer.category.junit.AbstractCategoryItemRendererTests::test2947660
+                        </failingTest>
+                        </failingTests>
+                    <!--excludedMethods>
+                        <param>equals</param>
+                        <param>hashCode</param>
+                    </excludedMethods-->
+                </configuration>
+            </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>3.2</version>
+        <configuration>
+          <!-- 1.8 is required to compile the JavaFX support. -->
+          <source>1.7</source>
+          <target>1.7</target>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-source-plugin</artifactId>
+        <version>2.2.1</version>
+        <executions>
+          <execution>
+            <phase>package</phase>
+            <goals>
+              <goal>jar</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <version>2.18.1</version>
+        <configuration>
+         <includes>
+      <include>**/*PackageTests.java</include>
+    </includes>
+          <!-- this is here to prevent exceptions being thrown with no message -->
+          <!-- or stack trace, which can happen on oracle JVMs after a while   -->
+          <argLine>-XX:-OmitStackTraceInFastThrow</argLine>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-javadoc-plugin</artifactId>
+        <version>2.9</version>
+        <configuration>
+          <overview>src/main/java/overview.html</overview>
+          <docfilessubdirs>true</docfilessubdirs>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+
+  <properties>
+     <project.build.outputEncoding>UTF-8</project.build.outputEncoding>
+     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+  </properties>
+
+  <dependencies>
+<dependency>
+    <groupId>commons-codec</groupId>
+    <artifactId>commons-codec</artifactId>
+    <version>1.9</version>
+</dependency>
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>4.12</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>javax.servlet</groupId>
+      <artifactId>servlet-api</artifactId>
+      <version>2.5</version>
+      <scope>provided</scope>
+    </dependency>
+  </dependencies>
+
+</project>

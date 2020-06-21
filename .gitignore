@@ -1,0 +1,11 @@
+capgen-prf-plugin/target/
+capgen-wrapper/target/
+prf-core/target/
+prf-maven-plugin/target/
+.DS_Store
+.idea
+*.iml
+*~
+*#
+dependency-reduced-pom.xml
+mutated/
