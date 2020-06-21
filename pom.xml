@@ -12,7 +12,6 @@
     <modules>
         <module>prf-core</module>
         <module>prf-maven-plugin</module>
-<!--        <module>capgen-wrapper</module>-->
         <module>capgen-prf-plugin</module>
     </modules>
 
