@@ -255,8 +255,8 @@
         <configuration>
           <patchGenerationPlugin>
             <name>capgen</name>
-            <launcherJDKHomeDirectory>/opt/jdk1.8.0_251</launcherJDKHomeDirectory>
             <parameters>
+              <launcherJDKHomeDirectory>/Library/Java/JavaVirtualMachines/jdk1.8.0_231.jdk/Contents/Home</launcherJDKHomeDirectory>
               <subject>Math</subject>
               <bugId>65</bugId>
             </parameters>

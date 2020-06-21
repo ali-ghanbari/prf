@@ -2,7 +2,7 @@ package edu.utdallas.prf.maven;
 
 /*
  * #%L
- * prf-core
+ * prf-plugin
  * %%
  * Copyright (C) 2020 The University of Texas at Dallas
  * %%
@@ -20,25 +20,30 @@ package edu.utdallas.prf.maven;
  * #L%
  */
 
-import java.io.File;
+import edu.utdallas.prf.PRFPluginBase;
+
 import java.util.Map;
 
 /**
  * @author Ali Ghanbari (ali.ghanbari@utdallas.edu)
  */
-public class PatchGenerationPluginInfo extends NamedPlugin {
-    private File launcherJDKHomeDirectory;
+public abstract class NamedPluginInfo {
+    private String name; // name of the plugin
 
-    private Map<String, String> parameters; // e.g., {bug: Closure-112, ...}
+    private Map<String, String> parameters;
 
-    public PatchGenerationPluginInfo() { }
+    public NamedPluginInfo() { }
 
-    public PatchGenerationPluginInfo(final String name,
-                                     final File launcherJDKHomeDirectory,
-                                     final Map<String, String> parameters) {
+    public NamedPluginInfo(String name) {
         this.name = name;
-        this.launcherJDKHomeDirectory = launcherJDKHomeDirectory;
-        this.parameters = parameters;
+    }
+
+    public String getName() {
+        return this.name;
+    }
+
+    public void setName(final String name) {
+        this.name = name;
     }
 
     public Map<String, String> getParameters() {
@@ -49,11 +54,7 @@ public class PatchGenerationPluginInfo extends NamedPlugin {
         this.parameters = parameters;
     }
 
-    public File getLauncherJDKHomeDirectory() {
-        return launcherJDKHomeDirectory;
-    }
-
-    public void setLauncherJDKHomeDirectory(final File launcherJDKHomeDirectory) {
-        this.launcherJDKHomeDirectory = launcherJDKHomeDirectory;
+    public boolean matches(final PRFPluginBase plugin) {
+        return this.name.equalsIgnoreCase(plugin.name());
     }
 }

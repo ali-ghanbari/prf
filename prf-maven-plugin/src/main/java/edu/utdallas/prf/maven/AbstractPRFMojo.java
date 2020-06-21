@@ -160,10 +160,10 @@ public class AbstractPRFMojo extends AbstractMojo {
      * Example:
      * <patchGenerationPlugin>
      *     <name>capgen</name>
-     *     <launcherJDKHomeDirectory>/path/to/launcher/JDK/home/directory</launcherJDKHomeDirectory>
      *     <parameters>
-     *         <project>Closure</project>
-     *         <bugId>112</bugId>
+     *         <launcherJDKHomeDirectory>/path/to/launcher/JDK/home/directory</launcherJDKHomeDirectory>
+     *         <project>Chart</project>
+     *         <bugId>1</bugId>
      *     </parameters>
      * </patchGenerationPlugin>
      * As for the name of the plugin, case does not matter.
@@ -175,10 +175,10 @@ public class AbstractPRFMojo extends AbstractMojo {
      * the base directory of the project, and it shall fail in case the directory is non-existent.
      */
     @Parameter(property = "patchGenerationPlugin")
-    protected PatchGenerationPluginInfo patchGenerationPlugin;
+    protected NamedPluginInfo patchGenerationPlugin;
 
     @Parameter(property = "patchPrioritizationPlugin")
-    protected PatchPrioritizationPluginInfo patchPrioritizationPlugin;
+    protected NamedPluginInfo patchPrioritizationPlugin;
 
     @Parameter(property = "testCoverage", defaultValue = "false")
     protected boolean testCoverage;
@@ -288,7 +288,7 @@ public class AbstractPRFMojo extends AbstractMojo {
                         " This is perhaps a classpath issue.");
             }
         }
-        final PatchGenerationPluginInfo pgInfo = this.patchGenerationPlugin;
+        final NamedPluginInfo pgInfo = this.patchGenerationPlugin;
         if (pgInfo.getParameters() == null) {
             pgInfo.setParameters(Collections.<String, String>emptyMap());
         }
@@ -304,7 +304,7 @@ public class AbstractPRFMojo extends AbstractMojo {
                         " This is perhaps a classpath issue.");
             }
         }
-        final PatchPrioritizationPluginInfo ppInfo = this.patchPrioritizationPlugin;
+        final NamedPluginInfo ppInfo = this.patchPrioritizationPlugin;
         if (ppInfo.getParameters() == null) {
             ppInfo.setParameters(Collections.<String, String>emptyMap());
         }

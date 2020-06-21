@@ -60,9 +60,6 @@ public class DummyPatchGenerationPlugin implements PatchGenerationPlugin {
     public void setCompatibleJREHomeDirectory(File compatibleJREHomeDirectory) { }
 
     @Override
-    public void setLauncherJDKHomeDirectory(File launcherJDKHomeDirectory) { }
-
-    @Override
     public void visitPluginParameter(String key, String value) { }
 
     @Override

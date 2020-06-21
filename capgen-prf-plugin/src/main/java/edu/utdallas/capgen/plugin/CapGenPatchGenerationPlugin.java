@@ -58,17 +58,15 @@ public class CapGenPatchGenerationPlugin implements PatchGenerationPlugin {
     private int bugId;
 
     @Override
-    public void setLauncherJDKHomeDirectory(final File launcherJDKHomeDirectory) {
-        this.launcherJDKHomeDirectory = launcherJDKHomeDirectory;
-    }
-
-    @Override
-    public void visitPluginParameter(String key, String value) {
+    public void visitPluginParameter(final String key, final String value) {
         if ("subject".equals(key)) {
             this.subject = value;
         }
         if ("bugId".equals(key)) {
             this.bugId = Integer.parseInt(value);
+        }
+        if ("launcherJDKHomeDirectory".equals(key)) {
+            this.launcherJDKHomeDirectory = new File(value);
         }
     }
 

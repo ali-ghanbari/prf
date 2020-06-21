@@ -28,9 +28,6 @@ import java.util.List;
  * @author Ali Ghanbari (ali.ghanbari@utdallas.edu)
  */
 public interface PatchGenerationPlugin extends PRFPluginBase, Closeable {
-    // Home directory of JDK used for launching patch generation algorithm
-    void setLauncherJDKHomeDirectory(File launcherJDKHomeDirectory);
-
     // This method shall be called for each extra parameter intended to fine-tune the patch generation plugin
     void visitPluginParameter(String key, String value);
 

@@ -22,8 +22,7 @@ package edu.utdallas.prf;
 
 import edu.utdallas.prf.commons.misc.Ansi;
 import edu.utdallas.prf.commons.process.LoggerUtils;
-import edu.utdallas.prf.maven.PatchGenerationPluginInfo;
-import edu.utdallas.prf.maven.PatchPrioritizationPluginInfo;
+import edu.utdallas.prf.maven.NamedPluginInfo;
 import edu.utdallas.prf.profiler.Profiler;
 import edu.utdallas.prf.profiler.ProfilerOptions;
 import edu.utdallas.prf.profiler.ProfilerResults;
@@ -99,11 +98,11 @@ public class PRFEntryPoint {
 
     private final PatchGenerationPlugin patchGenerationPlugin;
 
-    private final PatchGenerationPluginInfo patchGenerationPluginInfo;
+    private final NamedPluginInfo patchGenerationPluginInfo;
 
     private final PatchPrioritizationPlugin patchPrioritizationPlugin;
 
-    private final PatchPrioritizationPluginInfo patchPrioritizationPluginInfo;
+    private final NamedPluginInfo patchPrioritizationPluginInfo;
 
     private ProcessArgs defaultProcessArgs;
 
@@ -128,9 +127,9 @@ public class PRFEntryPoint {
                           final FLStrategy flStrategy,
                           final MavenProject mavenProject,
                           final PatchGenerationPlugin patchGenerationPlugin,
-                          final PatchGenerationPluginInfo patchGenerationPluginInfo,
+                          final NamedPluginInfo patchGenerationPluginInfo,
                           final PatchPrioritizationPlugin patchPrioritizationPlugin,
-                          final PatchPrioritizationPluginInfo patchPrioritizationPluginInfo) {
+                          final NamedPluginInfo patchPrioritizationPluginInfo) {
         this.classPath = classPath;
         this.byteArraySource = byteArraySource;
         this.whiteListPrefix = whiteListPrefix;
@@ -211,7 +210,7 @@ public class PRFEntryPoint {
         return new PRFEntryPoint(this.classPath, this.byteArraySource, this.whiteListPrefix, this.testClassFilter, this.failingTests, this.compatibleJREHome, this.childProcessArguments, this.parallelism, this.timeoutConstant, this.timeoutPercent, this.collectCoverage, this.flOptions, this.flStrategy, this.mavenProject, patchGenerationPlugin, this.patchGenerationPluginInfo, this.patchPrioritizationPlugin, this.patchPrioritizationPluginInfo);
     }
 
-    public PRFEntryPoint withPatchGenerationPluginInfo(final PatchGenerationPluginInfo patchGenerationPluginInfo) {
+    public PRFEntryPoint withPatchGenerationPluginInfo(final NamedPluginInfo patchGenerationPluginInfo) {
         return new PRFEntryPoint(this.classPath, this.byteArraySource, this.whiteListPrefix, this.testClassFilter, this.failingTests, this.compatibleJREHome, this.childProcessArguments, this.parallelism, this.timeoutConstant, this.timeoutPercent, this.collectCoverage, this.flOptions, this.flStrategy, this.mavenProject, this.patchGenerationPlugin, patchGenerationPluginInfo, this.patchPrioritizationPlugin, this.patchPrioritizationPluginInfo);
     }
 
@@ -219,7 +218,7 @@ public class PRFEntryPoint {
         return new PRFEntryPoint(this.classPath, this.byteArraySource, this.whiteListPrefix, this.testClassFilter, this.failingTests, this.compatibleJREHome, this.childProcessArguments, this.parallelism, this.timeoutConstant, this.timeoutPercent, this.collectCoverage, this.flOptions, this.flStrategy, this.mavenProject, patchGenerationPlugin, this.patchGenerationPluginInfo, patchPrioritizationPlugin, this.patchPrioritizationPluginInfo);
     }
 
-    public PRFEntryPoint withPatchPrioritizationPluginInfo(final PatchPrioritizationPluginInfo patchPrioritizationPluginInfo) {
+    public PRFEntryPoint withPatchPrioritizationPluginInfo(final NamedPluginInfo patchPrioritizationPluginInfo) {
         return new PRFEntryPoint(this.classPath, this.byteArraySource, this.whiteListPrefix, this.testClassFilter, this.failingTests, this.compatibleJREHome, this.childProcessArguments, this.parallelism, this.timeoutConstant, this.timeoutPercent, this.collectCoverage, this.flOptions, this.flStrategy, this.mavenProject, this.patchGenerationPlugin, this.patchGenerationPluginInfo, this.patchPrioritizationPlugin, patchPrioritizationPluginInfo);
     }
 
@@ -315,7 +314,7 @@ public class PRFEntryPoint {
         plugin.setProjectTestSourceDirectory(new File(build.getTestSourceDirectory()));
         plugin.setProjectBuildDirectory(new File(build.getOutputDirectory()));
         plugin.setCompatibleJREHomeDirectory(this.compatibleJREHome);
-        plugin.setLauncherJDKHomeDirectory(this.patchGenerationPluginInfo.getLauncherJDKHomeDirectory());
+//        plugin.setLauncherJDKHomeDirectory(this.patchGenerationPluginInfo.getLauncherJDKHomeDirectory());
         for (final Map.Entry<String, String> entry : this.patchGenerationPluginInfo.getParameters().entrySet()) {
             plugin.visitPluginParameter(entry.getKey(), entry.getValue());
         }

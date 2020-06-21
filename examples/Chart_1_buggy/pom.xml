@@ -68,13 +68,12 @@
         <configuration>
 	  <patchGenerationPlugin>
 	    <name>capgen</name>
-	    <launcherJDKHomeDirectory>/Library/Java/JavaVirtualMachines/jdk1.8.0_231.jdk/Contents/Home</launcherJDKHomeDirectory>
 	    <parameters>
-	      <subject>Chart</subject>
+            <launcherJDKHomeDirectory>/Library/Java/JavaVirtualMachines/jdk1.8.0_231.jdk/Contents/Home</launcherJDKHomeDirectory>
+            <subject>Chart</subject>
 	      <bugId>1</bugId>
 	    </parameters>
 	  </patchGenerationPlugin>
-	  <parallelism>8</parallelism>
           <whiteListPrefix>org.jfree</whiteListPrefix>
           <failingTests>
             <failingTest>org.jfree.chart.renderer.category.junit.AbstractCategoryItemRendererTests:test2947660</failingTest>
