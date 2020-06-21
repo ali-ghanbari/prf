@@ -27,7 +27,7 @@ import java.util.Map;
 /**
  * @author Ali Ghanbari (ali.ghanbari@utdallas.edu)
  */
-public abstract class NamedPluginInfo {
+public class NamedPluginInfo {
     private String name; // name of the plugin
 
     private Map<String, String> parameters;
