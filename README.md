@@ -1,4 +1,4 @@
-# PRF: An Automatic Program Repair Framework for JVM Languages
+# PRF: A Framework for Building Automatic Program Repair Prototypes for JVM-based Language
 
 ## Table of Contents
 - [Introduction](#introduction)
@@ -26,12 +26,12 @@ help APR researchers re-use components common to all test-based generate-and-val
 APR techniques and make it easier for them to build their prototypes. With the help
 of extant APR libraries such as [ASTOR](https://github.com/SpoonLabs/astor),
 developers of APR tools will only need to focus on design and implementation
-of more effective patch generation algorithm. Furthermore, since PRF is highly
+of more effective patch generation algorithms. Furthermore, since PRF is highly
 configurable, they will be able customize other aspects of their systems, such
 as fault localization, patch validation, and patch prioritization/filtering.
 
 This document presents an overview of the system. We have also provided the users
-with a pre-configured patch generation plugin for based on the recent APR tool
+with a pre-configured patch generation plugin based on the recent APR tool
 [CapGen](https://github.com/justinwm/CapGen) for demonstration purposes.
 
 ## PRF Setup
@@ -41,7 +41,7 @@ machine. You can follow the instructions to clone, compile and install
 PRF Maven plugin. Along with the Maven plugin, other library files also
 get installed on your local machine, so the APR system developers can
 make their own patch generation as well as patch prioritization or
-filtering plugins. In the section that follows, you will find a number
+filtering plugins. In the section that follows, you will find a couple
 of example buggy projects that you can try to fix using our patch
 generation plugin for CapGen.
 
@@ -50,9 +50,9 @@ section and make sure you have at least Maven, Git, JDK 1.7
 (in case you wish to fix Defects4J projects), and JDK 1.8 (to run
 the core part of our CapGen plugin) installed on your computer
 and the environment variable `JAVA_HOME` is pointing to the
-installation patch of JDK 1.7. For example, in my Linux machine,
-JDK 1.7 is installed under `/Library/Java/JavaVirtualMachines/jdk1.7.0_80.jdk/Contents/Home`. So, I use the following
-command to set `JAVA_HOME` variable. 
+installation patch of JDK 1.7. For example, in my Unix machine,
+JDK 1.7 is installed under `/Library/Java/JavaVirtualMachines/jdk1.7.0_80.jdk/Contents/Home`.
+So, I use the following command to set `JAVA_HOME` variable. 
 ```shell script
 export JAVA_HOME=/Library/Java/JavaVirtualMachines/jdk1.7.0_80.jdk/Contents/Home
 ```
@@ -78,7 +78,7 @@ project on your local repository by using the following commands.
 cd prf
 mvn clean install -Dhttps.protocols=TLSv1.2
 ```
-Downloading all the dependencies and making the JAR file might take up to
+Downloading all the dependencies and making the JAR files might take up to
 a minute depending on the load of your computer and the speed of your
 Internet connection. Please note that the command line switch
 `-Dhttps.protocols=TLSv1.2` is necessary when you are compiling projects
