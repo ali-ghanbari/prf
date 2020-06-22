@@ -21,6 +21,8 @@ package edu.utdallas.prf.commons.misc;
  */
 
 /**
+ * A set of utilities for color printing on the Terminal window.
+ *
  * @author Ali Ghanbari (ali.ghanbari@utdallas.edu)
  */
 public final class Ansi {

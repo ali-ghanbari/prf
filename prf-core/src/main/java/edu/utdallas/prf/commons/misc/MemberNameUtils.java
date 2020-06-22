@@ -23,6 +23,8 @@ package edu.utdallas.prf.commons.misc;
 import org.objectweb.asm.Type;
 
 /**
+ * Utility functions for manipulating identifiers of class members, i.e. methods and fields.
+ *
  * @author Ali Ghanbari (ali.ghanbari@utdallas.edu)
  */
 public class MemberNameUtils {

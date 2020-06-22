@@ -21,6 +21,8 @@ package edu.utdallas.prf.commons.misc;
  */
 
 /**
+ * Utility functions for "cleanly" accessing properties.
+ *
  * @author Ali Ghanbari (ali.ghanbari@utdallas.edu)
  */
 public class PropertyUtils {
