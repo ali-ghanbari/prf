@@ -22,7 +22,7 @@ package edu.utdallas.prf;
 
 /**
  * This is essentially a map with the following signature:
- * class name -> suspiciousness value
+ * class name -- suspiciousness value
  * This is a bit different that what is common in literature. However, we believe, most
  * of the times, class-level FL coincides with file level FL.
  * In fact this is more general than that, as one can aggregate the suspiciousness

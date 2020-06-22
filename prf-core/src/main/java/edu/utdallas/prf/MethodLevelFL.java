@@ -21,7 +21,7 @@ package edu.utdallas.prf;
  */
 
 /**
- * fully qualified method name (Javassist long name) -> suspiciousness value
+ * fully qualified method name (Javassist long name) -- suspiciousness value
  *
  * @author Ali Ghanbari (ali.ghanbari@utdallas.edu)
  */
