@@ -10,7 +10,6 @@
     * [YouTube Demo Video](#youtube-demo-video)
 - [Developing PRF Plugins](#developing-prf-plugins)
 - [System Requirements](#system-requirements)
-- [Empirical Analysis](#empirical-analysis)
 
 ## Introduction
 PRF (**P**rogram **R**epair **F**ramework) provides a framework consisting
