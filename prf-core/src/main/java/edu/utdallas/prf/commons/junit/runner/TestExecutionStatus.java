@@ -21,6 +21,11 @@ package edu.utdallas.prf.commons.junit.runner;
  */
 
 /**
+ * Different values for test execution result during patch validation.
+ * <code>EARLY_EXIT</code>: A test has failed, due to any reason, e.g., assertion failure
+ * <code>TIMED_OUT</code>: A test has timed out (the time calculated via user-provided parameters)
+ * <code>OK</code>: The test passed
+ *
  * @author Ali Ghanbari (ali.ghanbari@utdallas.edu)
  */
 public enum TestExecutionStatus {

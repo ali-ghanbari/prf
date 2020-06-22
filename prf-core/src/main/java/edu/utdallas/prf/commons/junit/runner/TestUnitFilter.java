@@ -28,6 +28,8 @@ import java.io.Serializable;
 import java.util.Collection;
 
 /**
+ * A set of utility methods that produce common test unit filters.
+ *
  * @author Ali Ghanbari (ali.ghanbari@utdallas.edu)
  */
 public abstract class TestUnitFilter implements Predicate<TestUnit>, Serializable {

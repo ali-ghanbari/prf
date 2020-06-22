@@ -27,6 +27,9 @@ import org.pitest.testapi.ResultCollector;
 import java.util.List;
 
 /**
+ * A result collector that prints out the name of the test cases as they are executed.
+ * This result collector also records the observed results of test cases (e.g., failed/passed).
+ *
  * @author Ali Ghanbari (ali.ghanbari@utdallas.edu)
  */
 class DefaultResultCollector implements ResultCollector {

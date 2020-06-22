@@ -38,11 +38,14 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-/**
- * @author Ali Ghanbari (ali.ghanbari@utdallas.edu)
- */
 import static edu.utdallas.prf.commons.junit.JUnitUtils.discoverTestUnits;
 
+/**
+ * A set of utility methods for running JUnit test cases.
+ * The methods allows running entire test class or test cases selectively.
+ *
+ * @author Ali Ghanbari (ali.ghanbari@utdallas.edu)
+ */
 public class JUnitRunner {
     private static final ExecutorService EXECUTOR_SERVICE;
 

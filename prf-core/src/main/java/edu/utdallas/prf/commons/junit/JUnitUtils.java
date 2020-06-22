@@ -43,6 +43,9 @@ import java.util.Map;
 import java.util.Set;
 
 /**
+ * A set of versatile functions for finding JUnit test cases.
+ * These utility functions support JUnit 3.XX and 4.YY.
+ *
  * @author Ali Ghanbari (ali.ghanbari@utdallas.edu)
  */
 public class JUnitUtils {
