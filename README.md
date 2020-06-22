@@ -3,10 +3,10 @@
 ## Table of Contents
 - [Introduction](#introduction)
 - [PRF Setup](#prf-setup)
+    * [Maven Project Setup](#maven-project-setup)
 - [PRF Demonstration](#prf-demonstration)
     * [Example 1: Chart-1 of Defects4J](#example-1-chart-1-of-defects4j)
     * [Example 2: Math-65 of Defects4J](#example-2-math-65-of-defects4j)
-    * [Other Buggy Projects](#other-buggy-projects)
     * [YouTube Demo Video](#youtube-demo-video)
 - [Developing PRF Plugins](#developing-prf-plugins)
     * [Developing Patch Generation Plugin](#developing-patch-generation-pluging)
@@ -86,8 +86,213 @@ using JDK 1.7 and older. This is a security measure that is in place
 since 2018. After seeing (green) `BUILD SUCCESS` message on your screen,
 your PRF Maven plugin, and the related library files, are ready to use.
 
-Please see the examples in the section that follows to learn how you can
-use PRF Maven plugin.  
+During the first reading, you may skip the following subsection and see
+the examples in the next section so that you can experience PRF in action
+while a patch generation plugin is installed on it.
+
+### Maven Project Setup
+Assuming that you have already followed the instructions given in
+[setup](#prf-setup) section to install PRF Maven plugin, and its companion
+libraries, in this section we will give detailed instructions for setting
+up PRF for fixing bugs in arbitrary Maven-based projects.
+
+In order to be able to use PRF Maven plugin, you need to introduce
+it as a plugin in the POM file of the target project. This can be done
+by adding the following template XML snippet under the `<plugins>` tag
+in the `pom.xml` of the target project.
+```xml
+<plugin>
+    <groupId>edu.utdallas</groupId>
+    <artifactId>prf-maven-plugin</artifactId>
+    <version>1.0-SNAPSHOT</version>
+<!--    <configuration>                                                             -->
+<!-- ***************************** PROFILER OPTIONS ******************************* -->
+
+        <!-- <flOptions>OFF</flOptions>                                             -->
+        <!-- <flStrategy>OCHIAI</flStrategy>                                        -->
+        <!-- <testCoverage>false</testCoverage>                                     -->
+        <!-- <failingTests>                                                         -->
+        <!--    <failingTest>fully.qualified.test.Class1::testMethod1</failingTest> -->
+        <!--    ...                                                                 -->
+        <!--    <failingTest>fully.qualified.test.ClassN::testMethodN</failingTest> -->
+        <!-- </failingTests>                                                        -->
+
+<!-- ************************** PATCH GENERATOR OPTIONS *************************** -->
+
+        <!-- <patchGenerationPlugin>                                                -->
+        <!--    <name>dummy-patch-generation-plugin</name>                          -->
+        <!--    <parameters>                                                        -->
+        <!--        <parameter1>Value for parameter 1</parameter1>                  -->
+        <!--        ...                                                             -->
+        <!--        <parameterN>Value for parameter N</parameterN>                  -->
+        <!--    </parameters>                                                       -->
+
+<!-- ************************** PATCH VALIDATOR OPTIONS *************************** -->
+
+        <!-- <parallelism>0</parallelism>                                           -->
+        <!-- <timeoutConstant>5000</timeoutConstant>                                -->
+        <!-- <timeoutPercent>0.5</timeoutPercent>                                   -->
+
+<!-- *********************** FIX REPORT GENERATION OPTIONS ************************ -->
+
+        <!-- <patchPrioritizationPlugin>                                            -->
+        <!--    <name>dummy-patch-prioritization-plugin</name>                      -->
+        <!--    <parameters>                                                        -->
+        <!--        <parameter1>Value for parameter 1</parameter1>                  -->
+        <!--        ...                                                             -->
+        <!--        <parameterK>Value for parameter K</parameterK>                  -->
+        <!--    </parameters>                                                       -->
+        <!-- </patchPrioritizationPlugin>                                           -->
+
+<!-- ****************************** GENERIC OPTIONS ******************************* -->
+
+        <!-- <whiteListPrefix>${project.groupId}</whiteListPrefix>                  -->
+        <!-- <targetTests>                                                          -->
+        <!--    <targetTest>{whiteListPrefix}.*Test</targetTest>                    -->
+        <!--    <targetTest>{whiteListPrefix}.*Tests</targetTest>                   -->
+        <!-- </targetTests>                                                         -->
+        <!-- <childJVMArgs>                                                         -->
+        <!--     <childJVMArg>-Xmx16g</childJVMArg>                                 -->
+        <!--     ...                                                                -->
+        <!--     <childJVMArg>Mth argument to the child JVM</childJVMArg>           -->
+        <!-- </childJVMArgs>                                                        -->
+<!--    </configuration>                                                            -->
+
+<!-- ************ DEPENDENCIES FOR EXTERNAL LIBRARIES, E.G., PLUGINS ************** -->
+
+<!--    <dependencies>                                                              -->
+<!--        <dependency> 1, e.g., your awesome patch generation plugin</dependency> -->
+<!--        <dependency> 2, e.g., your cool patch prioritization plugin</dependency>-->
+<!--        ...                                                                     -->
+<!--    </dependencies>                                                             -->
+</plugin>
+```
+The parts under the tag `<congigutation>` are all optional; we have shown their
+default values (or a description of the general form of their values) in comments.
+The part for dependencies is also optional. Obviously, if the repair process does
+not take advantage of any external library, e.g. a patch generation/prioritization
+plugin, there will be no need for a dependency. We stress that the XML snippet
+shown above is just a template, and the users will need to specialize values and
+get rid of those descriptions and/or ellipsis marks.
+
+In what follows, we explain each group of options starting from top.
+
+#### Profiler Options
+The current version of PRF allows the user to fine-tune the profiler via 4 set of
+parameters. Using `<flOptions>` the user specifies the level of granularity of fault
+localization or turn it off altogether. This parameter takes values `OFF` for no
+fault localization (the default option), `CLASS_LEVEL` for class-level fault
+localization, `METHOD_LEVEL` for method-level fault localization, and `LINE_LEVEL`
+for source line level fault localization. Fault localization is off by default.
+It is worth mentioning that the more fine-grained class-level fault localization,
+as opposed to file-level fault localization, is not popular in fault localization
+literature. However, most of the times these two coincide and we one can always
+aggregate class-level suspiciousness values to calculate file-level fault localization
+information<sup>:one:</sup>.
+
+Using the parameter `<flStrategy>` the user can specify the fault localization
+formula to be used for calculating suspiciousness values for each program elements.
+In the current version of PRF, this parameter, takes values `OCHIAI` and `TARANTULA`.
+
+
+Using `<testCoverage>` the user can specify the 
+        <!--                                              -->
+        <!-- <flStrategy>OCHIAI</flStrategy>                                        -->
+        <!-- <testCoverage>false</testCoverage>                                     -->
+        <!-- <failingTests>                                                         -->
+        <!--    <failingTest>fully.qualified.test.Class1::testMethod1</failingTest> -->
+        <!--    ...                                                                 -->
+        <!--    <failingTest>fully.qualified.test.ClassN::testMethodN</failingTest> -->
+        <!-- </failingTests>                                                        -->
+For example, the only failing test for Defects4J bug Chart-12 is as follows.
+```xml
+<failingTests>
+    <failingTest>org.jfree.chart.plot.junit.MultiplePiePlotTests::testConstructor</failingTest>
+</failingTests>
+``` 
+Please note that you may use `:` or simply `.` instead of `::` as the separator
+between the test class name and method name.
+
+By default, the system looks for a CSV file named `input-file.csv` under the
+project's base directory. The file generated by our tool `input-file-generator`
+, described shortly, shall also generate the required CSV file named as such.
+Nevertheless, you may use a different file as the CSV file by specifying its
+relative/absolute patch and name under `<inputCSVFile>` tag.
+
+ObjSim uses groupId of the target project to identify the application classes
+of the target project during instrumentation. This default action can be customized
+via the tag `<whiteListPrefix>`. The user can write their desired prefix of classes
+to be instrumented. Please note that ObjSim expects that `<whiteListPrefix>`
+includes all the patched method mentioned in the input CSV file. 
+
+Last but not least, since test cases of some large and complex projects might
+be demanding, we have provided the user with a mechanism through which they
+can specify the maximum amount of allotted heap space (and/or permanent
+generation space, if applicable) for the child _profiler_ processes. Profiler
+processes, as described in the paper, are responsible for executing test cases
+against the original and patched program and collect information about the
+system state right at the exit point(s) of the specified patched method.
+
+In the rest of this section, we discuss the format of input CSV file expected
+by ObjSim Maven plugin and the way you can automatically generate the file
+for a Maven project on which PraPR is already applied.
+
+As we have already discussed in the paper, the input CSV file is expected
+to consist of the five columns as follows.
+```text
+Id, Susp, Method, Class-File, Covering-Tests
+```
+Each row of this file corresponds to a patch, wherein `Id` is an integer
+identifier for the patch, `Susp` is the suspiciousness value of the patched
+location corresponding to the patch, `Method` is fully qualified name and
+signature of the patched method, `Class-File` is the path to the patched
+class file (if you are using a source code-level APR, you can compile the
+patched class file to get the desired `.class` file), and `Covering-Tests`
+denotes the space-separated list of fully qualified test case names covering
+the patched location corresponding to the patch. Please note that one can
+list all the test cases of the program here in case covering test cases
+are not available. We stress that using covering test cases is preferable
+only due to performance considerations during profiling.
+
+As for the patches generated by PraPR, the script `input-file-generator`
+that we have included in this repository, generated the information described
+above in the following way. `Id` corresponds to the patch number located in
+LOG fix report generated by PraPR (LOG fix reports of PraPR are stored in
+`target/prapr-reports/*/fix-report.log`). The values of `Susp` and `Method`
+are obtained from the XML report generated by PraPR (compressed XML report
+of PraPR are stored in `target/prapr-reports/*/mutations.xml.gz`). It is
+worth noting that suspiciousness values computed by PraPR are based on
+well-known Ochiai formula, but any other suspiciousness formula can also
+be used. `Class-File` is intended to point to the class file corresponding
+to the patch which in case of PraPR is stored with the name `mutant-*.class`
+under the directory `target/prapr-reports/*/pool/`. Lastly, the script
+extracts the test cases covering patched location corresponding to each patch
+from the XML report of PraPR.
+
+With that said, in order for our script find the required information, PraPR
+should be configure to produce both LOG and XML file as well as the flag
+`verboseReport` should be set to true so that the tool dumps all the class
+files in the `pool` folder.
+
+After running PraPR with the aforementioned configurations, if the tool is
+able to find more than one plausible patch, you can follow the steps
+instructed below to produce the desired input CSV file.
+
+**Step 0:** Please make sure the environment variable `JAVA_HOME` points
+to the home directory of JDK 1.8. Please also make sure that there are
+one or more patches listed in the LOG report in
+`target/prapr-reports/*/fix-report.log`, the XML report
+`target/prapr-reports/*/mutations.xml.gz`
+exists, and the directory `target/prapr-reports/*/pool/` contains one
+or more `.class` files.
+
+**Step 1:** Assuming that ObjSim's base directory is in system `PATH`,
+you may use the following command to generate the desired `input-file.csv`.
+```shell script
+input-file-generator target/prapr-reports/*/
+```
+After running the tool, you can find the file `input-file.csv` stored
+in the base directory of the target project.
 
 ## PRF Demonstration
 In order to get a feeling of how PRF operates with a patch generation
@@ -193,214 +398,13 @@ you will be able to review the fix report that appears above the
 
 ```
 
-### Other Buggy Projects
-Assuming that you have already followed the instructions given in
-[setup](#prf-setup) section to install PRF Maven plugin, and its companion
-libraries, in this section we will give detailed instructions for setting
-up PRF for fixing bugs in arbitrary Maven-based projects.
-
-In order to be able to use PRF Maven plugin, you need to introduce
-it as a plugin in the POM file of the target project. This can be done
-by adding the following template XML snippet under the `<plugins>` tag
-in the `pom.xml` of the target project.
-```xml
-<plugin>
-    <groupId>edu.utdallas</groupId>
-    <artifactId>prf-maven-plugin</artifactId>
-    <version>1.0-SNAPSHOT</version>
-<!--    <configuration>                                                             -->
-<!-- ***************************** PROFILER OPTIONS ******************************* -->
-
-        <!-- <flOptions>OFF</flOptions>                                             -->
-        <!-- <flStrategy>OCHIAI</flStrategy>                                        -->
-        <!-- <testCoverage>false</testCoverage>                                     -->
-        <!-- <failingTests>                                                         -->
-        <!--    <failingTest>fully.qualified.test.Class1::testMethod1</failingTest> -->
-        <!--    ...                                                                 -->
-        <!--    <failingTest>fully.qualified.test.ClassN::testMethodN</failingTest> -->
-        <!-- </failingTests>                                                        -->
-
-<!-- ************************** PATCH GENERATOR OPTIONS *************************** -->
-
-        <!-- <patchGenerationPlugin>                                                -->
-        <!--    <name>dummy-patch-generation-plugin</name>                          -->
-        <!--    <parameters>                                                        -->
-        <!--        <parameter1>Value for parameter 1</parameter1>                  -->
-        <!--        ...                                                             -->
-        <!--        <parameterN>Value for parameter N</parameterN>                  -->
-        <!--    </parameters>                                                       -->
-
-<!-- ************************** PATCH VALIDATOR OPTIONS *************************** -->
-
-        <!-- <parallelism>0</parallelism>                                           -->
-        <!-- <timeoutConstant>5000</timeoutConstant>                                -->
-        <!-- <timeoutPercent>0.5</timeoutPercent>                                   -->
-
-<!-- *********************** FIX REPORT GENERATION OPTIONS ************************ -->
-
-        <!-- <patchPrioritizationPlugin>                                            -->
-        <!--    <name>dummy-patch-prioritization-plugin</name>                      -->
-        <!--    <parameters>                                                        -->
-        <!--        <parameter1>Value for parameter 1</parameter1>                  -->
-        <!--        ...                                                             -->
-        <!--        <parameterK>Value for parameter K</parameterK>                  -->
-        <!--    </parameters>                                                       -->
-        <!-- </patchPrioritizationPlugin>                                           -->
-
-<!-- ****************************** GENERIC OPTIONS ******************************* -->
-
-        <!-- <whiteListPrefix>${project.groupId}</whiteListPrefix>                  -->
-        <!-- <targetTests>                                                          -->
-        <!--    <targetTest>{whiteListPrefix}.*Test</targetTest>                    -->
-        <!--    <targetTest>{whiteListPrefix}.*Tests</targetTest>                   -->
-        <!-- </targetTests>                                                         -->
-        <!-- <childJVMArgs>                                                         -->
-        <!--     <childJVMArg>-Xmx16g</childJVMArg>                                 -->
-        <!--     ...                                                                -->
-        <!--     <childJVMArg>Mth argument to the child JVM</childJVMArg>           -->
-        <!-- </childJVMArgs>                                                        -->
-<!--    </configuration>                                                            -->
-
-<!-- ************ DEPENDENCIES FOR EXTERNAL LIBRARIES, E.G., PLUGINS ************** -->
-
-<!--    <dependencies>                                                              -->
-<!--        <dependency> 1, e.g., your awesome patch generation plugin</dependency> -->
-<!--        <dependency> 2, e.g., your cool patch prioritization plugin</dependency>-->
-<!--        ...                                                                     -->
-<!--    </dependencies>                                                             -->
-</plugin>
-```
-Some of the tags under `<congigutation>` are optional; we have shown with their
-default values them in the form of comments. We stress that the XML snippet
-shown above is just a template and the users will need to specialize values and
-get rid of those ellipsis marks.
-
-For example, the only failing test for Defects4J bug Chart-12 is as follows.
-```xml
-<failingTests>
-    <failingTest>org.jfree.chart.plot.junit.MultiplePiePlotTests::testConstructor</failingTest>
-</failingTests>
-``` 
-Please note that you may use `:` or simply `.` instead of `::` as the separator
-between the test class name and method name.
-
-By default, the system looks for a CSV file named `input-file.csv` under the
-project's base directory. The file generated by our tool `input-file-generator`
-, described shortly, shall also generate the required CSV file named as such.
-Nevertheless, you may use a different file as the CSV file by specifying its
-relative/absolute patch and name under `<inputCSVFile>` tag.
-
-ObjSim uses groupId of the target project to identify the application classes
-of the target project during instrumentation. This default action can be customized
-via the tag `<whiteListPrefix>`. The user can write their desired prefix of classes
-to be instrumented. Please note that ObjSim expects that `<whiteListPrefix>`
-includes all the patched method mentioned in the input CSV file. 
-
-Last but not least, since test cases of some large and complex projects might
-be demanding, we have provided the user with a mechanism through which they
-can specify the maximum amount of allotted heap space (and/or permanent
-generation space, if applicable) for the child _profiler_ processes. Profiler
-processes, as described in the paper, are responsible for executing test cases
-against the original and patched program and collect information about the
-system state right at the exit point(s) of the specified patched method.
-
-In the rest of this section, we discuss the format of input CSV file expected
-by ObjSim Maven plugin and the way you can automatically generate the file
-for a Maven project on which PraPR is already applied.
-
-As we have already discussed in the paper, the input CSV file is expected
-to consist of the five columns as follows.
-```text
-Id, Susp, Method, Class-File, Covering-Tests
-```
-Each row of this file corresponds to a patch, wherein `Id` is an integer
-identifier for the patch, `Susp` is the suspiciousness value of the patched
-location corresponding to the patch, `Method` is fully qualified name and
-signature of the patched method, `Class-File` is the path to the patched
-class file (if you are using a source code-level APR, you can compile the
-patched class file to get the desired `.class` file), and `Covering-Tests`
-denotes the space-separated list of fully qualified test case names covering
-the patched location corresponding to the patch. Please note that one can
-list all the test cases of the program here in case covering test cases
-are not available. We stress that using covering test cases is preferable
-only due to performance considerations during profiling.
-
-As for the patches generated by PraPR, the script `input-file-generator`
-that we have included in this repository, generated the information described
-above in the following way. `Id` corresponds to the patch number located in
-LOG fix report generated by PraPR (LOG fix reports of PraPR are stored in
-`target/prapr-reports/*/fix-report.log`). The values of `Susp` and `Method`
-are obtained from the XML report generated by PraPR (compressed XML report
-of PraPR are stored in `target/prapr-reports/*/mutations.xml.gz`). It is
-worth noting that suspiciousness values computed by PraPR are based on
-well-known Ochiai formula, but any other suspiciousness formula can also
-be used. `Class-File` is intended to point to the class file corresponding
-to the patch which in case of PraPR is stored with the name `mutant-*.class`
-under the directory `target/prapr-reports/*/pool/`. Lastly, the script
-extracts the test cases covering patched location corresponding to each patch
-from the XML report of PraPR.
-
-With that said, in order for our script find the required information, PraPR
-should be configure to produce both LOG and XML file as well as the flag
-`verboseReport` should be set to true so that the tool dumps all the class
-files in the `pool` folder.
-
-After running PraPR with the aforementioned configurations, if the tool is
-able to find more than one plausible patch, you can follow the steps
-instructed below to produce the desired input CSV file.
-
-**Step 0:** Please make sure the environment variable `JAVA_HOME` points
-to the home directory of JDK 1.8. Please also make sure that there are
-one or more patches listed in the LOG report in
-`target/prapr-reports/*/fix-report.log`, the XML report
-`target/prapr-reports/*/mutations.xml.gz`
-exists, and the directory `target/prapr-reports/*/pool/` contains one
-or more `.class` files.
-
-**Step 1:** Assuming that ObjSim's base directory is in system `PATH`,
-you may use the following command to generate the desired `input-file.csv`.
-```shell script
-input-file-generator target/prapr-reports/*/
-```
-After running the tool, you can find the file `input-file.csv` stored
-in the base directory of the target project.
-
 ### YouTube Demo Video
-You can watch our demo [YouTube video](https://bit.ly/2K8gnYV) showing how you can
-setup ObjSim and apply it on one of the example projects.
-
-## ObjSim Reports
-Once ObjSim Maven plugin runs, it prints out the name of the test cases
-being executed during profiling, exception traces of the failing tests,
-and some other information that helped us to better understand its
-runtime behavior and track and fix its bugs. In this section, we describe
-the information produced by this tool.
-
-All the information produced by ObjSim is stored inside the directory
-`objsim-output` located under the base directory of the target project.
+You can watch our demo [YouTube video](https://bit.ly/3ehduSS) showing how you can
+setup PRF and apply it on one of the example projects.
 
 ### Ranked Patches
-ObjSim does not print the sorted list of patches on the screen. Instead it
-dumps the list inside the file `objsim-output/ranking.txt` This files is
-merely a list of positive integers each in a new line. Each number identifies
-a patch, and these identifiers are consistent with the patch numbers used
-in the LOG report generated by PraPR.
 
 ### Other Artifacts
-Corresponding to each patch a directory shall be created under
-`objsim-output/`. These directories shall be named as `patch-n` where `n`
-if the identifier of the patch consistent with the ones in `rankings.txt`
-and those in LOG report generated by PraPR.
-
-Three files shall be created under `objsim-output/patch-n/`: (1) compressed
-file `original.gz`; (2) compressed file `patched.gz`; (3) CSV file containing
-raw distances between original and patched versions of the program. The two
-compressed files contain serialized form of the system state at the exit
-point(s) of the patched method (plus additional information about the test
-cases and the status of the test cases that cover the method). These files
-are not directly usable by the users and are intended to be used in the
-future versions of the tool and/or statistical study that we are currently
-conducting on these data. 
 
 ## System Requirements
 PRF is a pure Java program, so it is platform independent. Be that as it
@@ -417,115 +421,8 @@ JDK 8u171 or higher needed for running the core part of CapGen patch generation 
 * RAM: 16+ GB
 * Disk Space: 200+ MB free space
 
-## Empirical Analysis
-The following table shows the details of our experiments with 55 bugs from
-[Defects4J v1.4.0](https://github.com/Greg4cr/defects4j/tree/additional-faults-1.4)
-bug database. These bugs are the ones that [PraPR](https://github.com/prapr/prapr)
-is able to produce plausible patches (patches that simply pass all the test cases)
-and at least one genuine fix (plausible patches that correctly fix the bug).
-The goal is to show the effectiveness of ObjSim in prioritizing genuine fixes above
-the plausible, but overfitted, ones. 
-
-| Bug Id|# Plausible Patches|# Genuine Fixes|Rank Before|Rank After |
-|:---:  |:---:              | :---:           | :---:     | :---:     |
-| Chart-1|2|1|1|1 |
-| Chart-8|2|2|2|2 |
-| Chart-11|2|1|1|1 |
-| **Chart-12**|**2**|**1**|**2**|**1** |
-| Chart-20|1|1|1|1 |
-| Chart-24|2|1|1|1 |
-| Chart-26|100|1|17|Time-out |
-| Closure-10|4|1|1|4 |
-| Closure-11|15|3|1|Time-out |
-| Closure-14|1|1|1|1 |
-| Closure-18|1|1|1|1 |
-| Closure-31|9|1|6|Time-out |
-| Closure-46|7|2|1|4 |
-| Closure-62 <sup>:one:</sup>|1|1|1|1 |
-| Closure-63 <sup>:one:</sup>|1|1|1|1 |
-| Closure-70|1|1|1|1 |
-| Closure-73|1|1|1|1 |
-| Closure-86|3|2|1|1 |
-| Closure-92 <sup>:two:</sup>|4|1|1|4 |
-| Closure-93 <sup>:two:</sup>|4|1|1|4 |
-| Closure-126|12|2|5|Time-out |
-| CommonsCli-4|6|1|6|6 |
-| CommonsCli-22|1|1|1|1 |
-| CommonsCli-23|2|2|1|1 |
-| CommonsCodec-13|1|1|1|1 |
-| CommonsCsv-5|1|1|1|1 |
-| **CommonsJXPath-1**|**4**|**1**|**4**|**1** |
-| JacksonDatabind-8|1|1|1|1 |
-| **JacksonDatabind-34**|**2**|**1**|**2**|**1** |
-| JacksonDatabind-36|1|1|1|1 |
-| **JacksonDatabind-39**|**7**|**1**|**5**|**1** |
-| Jsoup-3|1|1|1|1 |
-| Jsoup-42|13|1|1|Time-out |
-| Lang-6|1|1|1|1 |
-| Lang-10|7|2|2|Time-out |
-| Lang-26|1|1|1|1 |
-| Lang-33|1|1|1|1 |
-| **Lang-57**|**3**|**1**|**3**|**1** |
-| Lang-59|2|1|2|2 |
-| Math-5|3|1|1|1 |
-| Math-33|1|1|1|1 |
-| Math-34|1|1|1|1 |
-| Math-50|30|1|30|30 |
-| Math-58|2|1|2|2 |
-| Math-59|1|1|1|1 |
-| Math-70|1|1|1|1 |
-| Math-75|1|1|1|1 |
-| **Math-82**|**9**|**1**|**9**|**1** |
-| Math-85|4|1|4|4 |
-| Mockito-5|31|1|31|31 |
-| **Mockito-29**|**2**|**1**|**2**|**1** |
-| Mockito-38|3|1|2|2 |
-| **Time-4**|**5**|**1**|**5**|**3** |
-| Time-11|32|1|1|1 |
-| **Time-19**|**2**|**1**|**2**|**1** |
-
-:one:, :two:: Bugs [Closure-62](https://github.com/Greg4cr/defects4j/blob/additional-faults-1.4/framework/projects/Closure/patches/62.src.patch) and [Closure-63](https://github.com/Greg4cr/defects4j/blob/additional-faults-1.4/framework/projects/Closure/patches/63.src.patch), as well as [Closure-92](https://github.com/Greg4cr/defects4j/blob/additional-faults-1.4/framework/projects/Closure/patches/92.src.patch) and [Closure-93](https://github.com/Greg4cr/defects4j/blob/additional-faults-1.4/framework/projects/Closure/patches/93.src.patch), are duplicated in Defects4J database. We counted each pair once in our analyses.
-
-In this table the column "Bug Id" represents the bug identifier consistent with that of
-Defects4J database. The columns "# Plausible Patches", and "# Genuine Fixes" list the number
-of plausible patches and genuine fixes, resp., generated by PraPR. The column "Rank Before"
-reports the _best rank_ of genuine fix, among other plausible patches, for each bug as
-prioritized by the default ranking scheme of PraPR. By best rank, we mean the rank of the
-first genuine fix that we find in the list of plausible patches. Lastly, the column "Rank After" 
-reports the best rank of genuine fix for each bug as prioritized by ObjSim. Please note that
-duplicated bug pairs have been treated as identical in our analyses.
-
-We conducted our experiments on a commodity Dell Optiplex 7020 PC with Intel Core i5 3.30GHz
-CPU, 16 GB of RAM, and running Ubuntu 16.04.6 LTS. The current version of ObjSim uses only
-one core of CPU at a time. We put a cap limit on the time and the amount of heap space that
-the tool was allowed to allocate. We ran ObjSim only for 5 minutes per bug and set the maximum
-heap size of the JVM instances to 16 GB. During 5 minutes period for each bug, the heap space
-for none of the bugs raised above 9 GB and only 6 of the bugs failed to get fully processed
-by ObjSim within the time budget.
-
-Despite such a tough limit, ObjSim has been able to prioritize 5 more genuine fixes in top-1
-position. This is more than 16% improvement in the number of genuine fixes ranked in top-1
-position. Please note that for 3 of the bugs, ObjSim degrades the rank of genuine fix, and
-that is because the genuine fix in those bugs happened to be involved in radical changes in
-control flow of the program, and hence in the objects that it computes, e.g., deleting a block
-of code (which redirects control flow to a method with entirely different body) and calling
-different methods with entirely different behavior, etc. As per the previous empirical studies
-<sup>:three:,:four:,:five:</sup>, most of such changes are unlikely to be genuine fixes for the
-bugs.
-
-In summary, ObjSim increases the number of genuine fixes ranked in top-1 position from 30
-to 35 (a 16.67% improvement), and it reduces the average rank of genuine fixes from 3.04 to
-2.74 (an almost 10% improvement).
-
-We are actively working on applying ObjSim on patches generated by other APR systems,
-including but not limited to ASTOR implementations, CapGen, NOPOL, and Sequencer. 
-We believe such an efficient and effective method for patch prioritization will contribute
-significantly for bringing APR systems to everyday programming.
 
 ***
 
-:three: Tan, et al., "Anti-patterns in search-based program repair," in FSE'16.
+:one: J. Sohn and S. Yoo, "FLUCCS: using code and change metrics to improve fault localization," in ISSTA'17.
 
-:four: Wen, et al., "Context-Aware Patch Generation for Better Automated Program Repair," in ICSE'18.
-
-:five: Le, et al., "History Driven Program Repair," in SANER'16.
