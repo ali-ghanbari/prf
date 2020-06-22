@@ -50,8 +50,8 @@ section and make sure you have at least Maven, Git, JDK 1.7
 (in case you wish to fix Defects4J projects), and JDK 1.8 (to run
 the core part of our CapGen plugin) installed on your computer
 and the environment variable `JAVA_HOME` is pointing to the
-installation patch of JDK 1.7. For example, in my Unix machine,
-JDK 1.7 is installed under `/Library/Java/JavaVirtualMachines/jdk1.7.0_80.jdk/Contents/Home`.
+installation patch of JDK 1.7. For example, on Unix machine that
+I am using, JDK 1.7 is installed under `/Library/Java/JavaVirtualMachines/jdk1.7.0_80.jdk/Contents/Home`.
 So, I use the following command to set `JAVA_HOME` variable. 
 ```shell script
 export JAVA_HOME=/Library/Java/JavaVirtualMachines/jdk1.7.0_80.jdk/Contents/Home
@@ -113,110 +113,161 @@ follow the instructions given below to have PRF fix the bug using its
 CapGen patch generation plugin.
 
 It is worth noting that if you want to apply PRF with CapGen plugin
-on it to Maven-based projects other than those stated in their original
+on it to a Maven-based projects other than those stated in their original
 [paper](https://dl.acm.org/doi/10.1145/3180155.3180233), you want to
 have the tool [Understand](https://scitools.com/features/) installed on
 your computer and configured properly. CapGen uses the tool to generate
-fix ingredients used during repair.
+fix ingredients used during repair. Furthermore, due to the specific
+design on CapGen, the name of the folder containing the buggy project
+should be of the form `[ProjectName]_[BugId]_buggy` where `[ProjectName]`
+denotes a project name in Defects4J (namely, Chart, Lang, Math, etc.) and
+`[BugId]` is a number which depending on the project can be any number greater
+than or equal 1 (e.g., for Chart this `[BugId]` should be between 1 and 26,
+while for Math, this could be between 1 and 106). For example, the folder
+containing the bug Chart-1 from Defects4J should be named `Chart_1_buggy`.
+Since we did not have access to the source code of CapGen, we could not
+obviate this peculiarity.
 
-**Step 1:** Navigate to the project folder, build the project, and invoke PRF.
+**Step 1:** Navigate to the bug project folder, adjust the POM file, build the
+project, and invoke PRF.
+
+Please note that in order to be able to invoke CapGen, you will need to make sure
+that you have adjusted the POM file for the project correctly so that our CapGen
+plugin will know the location of JDK 1.8 home directory. To do so, after navigating
+to the example bug project, you can open the file `pom.xml` via your favorite editor and
+search for the term `launcherJDKHomeDirectory`. You will need to update the value
+of the corresponding tag so that it denotes the location of JDK 1.8 home directory
+on your computer.
+
 ```shell script
 cd examples
 cd Chart_1_buggy
+# Please make sure you have adjusted the POM file as described above
 mvn clean test -DskipTests  -Dhttps.protocols=TLSv1.2
 mvn edu.utdallas:prf-maven-plugin:run -Dhttps.protocols=TLSv1.2
 ```
 
-Please note that we have already configured the POM files for these
-projects, so all you will need to is to invoke the above command. After
-seeing (green) `BUILD SUCCESS` message due to the last command, you
-will be able to review the raking results.
+After invoking the commands andseeing (green) `BUILD SUCCESS` message due to the
+last command, you will be able to review the fix results.
 
-**Step 2:** You can use the following command to print out the ranking
-results.
-```shell script
-cat objsim-output/ranking.txt
-```
-You should be able to see the patch numbers sorted in the following order.
+**Step 2:**  Fix report for the current version of PRF appears directly on your
+screen right above the `BUILD SUCCESS` message. However, you can always redirect
+the output of the tool to a file, if you desire so. The fix report for Chart-1 looks
+something like the following on my computer.
+
 ```text
-2
-1
-```
-These patch numbers correspond to patch numbers in the fix reports generated
-by our APR tool PraPR. C.f. ranking offered by PraPR's default patch
-prioritization mechanism:
-```shell script
-cat target/prapr-reports/*/fix-report.log
+=====================================
+    PRF Fix Report
+=====================================
+1.
+File: .../prf/examples/Chart_1_buggy/source/org/jfree/chart/renderer/category/AbstractCategoryItemRenderer.java
+Patch:
+1797c1797
+<         if (dataset == null) {
+---
+>         if (dataset != null) {
+---------------------------------------------
 ``` 
 
 ### Example 2: Math-65 of Defects4J
-Apache Commons JXPath is another Maven-based real-world Java code base
-with 14 bugs in Defects4J bug database. PraPR is able to fix JXPath-1.
-It generates four plausible patches among which only one genuinely fixes
-the bug. Since the patches location for the fixing patch happens to be
-covered by more originally passing test cases, the default Ochiai-based
-patch prioritization scheme of PraPR ranks the patch in the 4th position.
+Apache Commons Math is another Maven-based real-world Java code base
+with 106 bugs in Defects4J bug database; CapGen is able to fix 13 of them.
+Math-65 is one bugs fixable by CapGen, and it is due to its size that we
+included it among our examples. The steps needed to invoke PRF on this bug
+is more or less the same as in Example 1.
 
-Please follow the instructions given below to have ObjSim rank the
-patches.
-
-**Step 1:** Navigate to the project folder and invoke ObjSim.
+You will need to navigate to the bug project folder, adjust the POM file, and
+invoke PRF.
 ```shell script
 cd examples
-cd JXPath-1
+cd Math_65_buggy
+# Please make sure you have configured the POM file as described in the previous example
+mvn clean test -DskipTests  -Dhttps.protocols=TLSv1.2
 mvn edu.utdallas:objsim:validate -Dhttps.protocols=TLSv1.2
 ```
-After seeing (green) `BUILD SUCCESS` message due to the last command,
-you will be able to review the raking results.
+After seeing (green) `BUILD SUCCESS` message, due to the last command,
+you will be able to review the fix report that appears above the 
+`BUILD SUCCESS` message. In my case, the fix report looks like the following.
 
-**Step 2:** You can use the following command to print out the ranking
-results.
-```shell script
-cat objsim-output/ranking.txt
-```
-You should be able to see the patch numbers sorted in the following order.
 ```text
-4
-3
-1
-2
+
 ```
-As before, these patch numbers correspond to patch numbers in the fix
-reports generated by PraPR. You can compare this to the ranking offered
-by PraPR's default patch prioritization mechanism:
-```shell script
-cat target/prapr-reports/*/fix-report.log
-``` 
 
 ### Other Buggy Projects
 Assuming that you have already followed the instructions given in
-[setup](#objsim-setup) section to install ObjSim Maven plugin, in this
-section we will give detailed instructions for setting up ObjSim for
-arbitrary Maven-based projects.
+[setup](#prf-setup) section to install PRF Maven plugin, and its companion
+libraries, in this section we will give detailed instructions for setting
+up PRF for fixing bugs in arbitrary Maven-based projects.
 
-In order to be able to use ObjSim Maven plugin you need to introduce
+In order to be able to use PRF Maven plugin, you need to introduce
 it as a plugin in the POM file of the target project. This can be done
 by adding the following template XML snippet under the `<plugins>` tag
 in the `pom.xml` of the target project.
 ```xml
 <plugin>
     <groupId>edu.utdallas</groupId>
-    <artifactId>objsim</artifactId>
+    <artifactId>prf-maven-plugin</artifactId>
     <version>1.0-SNAPSHOT</version>
-    <configuration>
-        <failingTests>
-            <failingTest>fully.qualified.test.Class1::testMethod1</failingTest>
-            ...
-            <failingTest>fully.qualified.test.ClassN::testMethodN</failingTest>
-        </failingTests>
-        <!-- <inputCSVFile>input-file.csv</inputCSVFile>                  -->
-        <!-- <whiteListPrefix>${project.groupId}</whiteListPrefix>        -->
-        <!-- <childJVMArgs>                                               -->
-        <!--     <childJVMArg>-Xmx16g</childJVMArg>                       -->
-        <!--     ...                                                      -->
-        <!--     <childJVMArg>Mth argument to the child JVM</childJVMArg> -->
-        <!-- </childJVMArgs>                                              -->
-    </configuration>
+<!--    <configuration>                                                             -->
+<!-- ***************************** PROFILER OPTIONS ******************************* -->
+
+        <!-- <flOptions>OFF</flOptions>                                             -->
+        <!-- <flStrategy>OCHIAI</flStrategy>                                        -->
+        <!-- <testCoverage>false</testCoverage>                                     -->
+        <!-- <failingTests>                                                         -->
+        <!--    <failingTest>fully.qualified.test.Class1::testMethod1</failingTest> -->
+        <!--    ...                                                                 -->
+        <!--    <failingTest>fully.qualified.test.ClassN::testMethodN</failingTest> -->
+        <!-- </failingTests>                                                        -->
+
+<!-- ************************** PATCH GENERATOR OPTIONS *************************** -->
+
+        <!-- <patchGenerationPlugin>                                                -->
+        <!--    <name>dummy-patch-generation-plugin</name>                          -->
+        <!--    <parameters>                                                        -->
+        <!--        <parameter1>Value for parameter 1</parameter1>                  -->
+        <!--        ...                                                             -->
+        <!--        <parameterN>Value for parameter N</parameterN>                  -->
+        <!--    </parameters>                                                       -->
+
+<!-- ************************** PATCH VALIDATOR OPTIONS *************************** -->
+
+        <!-- <parallelism>0</parallelism>                                           -->
+        <!-- <timeoutConstant>5000</timeoutConstant>                                -->
+        <!-- <timeoutPercent>0.5</timeoutPercent>                                   -->
+
+<!-- *********************** FIX REPORT GENERATION OPTIONS ************************ -->
+
+        <!-- <patchPrioritizationPlugin>                                            -->
+        <!--    <name>dummy-patch-prioritization-plugin</name>                      -->
+        <!--    <parameters>                                                        -->
+        <!--        <parameter1>Value for parameter 1</parameter1>                  -->
+        <!--        ...                                                             -->
+        <!--        <parameterK>Value for parameter K</parameterK>                  -->
+        <!--    </parameters>                                                       -->
+        <!-- </patchPrioritizationPlugin>                                           -->
+
+<!-- ****************************** GENERIC OPTIONS ******************************* -->
+
+        <!-- <whiteListPrefix>${project.groupId}</whiteListPrefix>                  -->
+        <!-- <targetTests>                                                          -->
+        <!--    <targetTest>{whiteListPrefix}.*Test</targetTest>                    -->
+        <!--    <targetTest>{whiteListPrefix}.*Tests</targetTest>                   -->
+        <!-- </targetTests>                                                         -->
+        <!-- <childJVMArgs>                                                         -->
+        <!--     <childJVMArg>-Xmx16g</childJVMArg>                                 -->
+        <!--     ...                                                                -->
+        <!--     <childJVMArg>Mth argument to the child JVM</childJVMArg>           -->
+        <!-- </childJVMArgs>                                                        -->
+<!--    </configuration>                                                            -->
+
+<!-- ************ DEPENDENCIES FOR EXTERNAL LIBRARIES, E.G., PLUGINS ************** -->
+
+<!--    <dependencies>                                                              -->
+<!--        <dependency> 1, e.g., your awesome patch generation plugin</dependency> -->
+<!--        <dependency> 2, e.g., your cool patch prioritization plugin</dependency>-->
+<!--        ...                                                                     -->
+<!--    </dependencies>                                                             -->
 </plugin>
 ```
 Some of the tags under `<congigutation>` are optional; we have shown with their
