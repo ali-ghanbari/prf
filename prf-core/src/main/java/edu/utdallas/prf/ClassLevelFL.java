@@ -21,12 +21,9 @@ package edu.utdallas.prf;
  */
 
 /**
- * This is essentially a map with the following signature:
- * class name -- suspiciousness value
- * This is a bit different that what is common in literature. However, we believe, most
- * of the times, class-level FL coincides with file level FL.
- * In fact this is more general than that, as one can aggregate the suspiciousness
- * values and calculate file-level suspiciousness values.
+ * This is a hash table mapping a class to the suspiciousness value computed for
+ * that class. Being a hash table, apparently, the object's <code>get</code> method
+ * shall return <code>null</code> in case the given class is covered by no test case.
  *
  * @author Ali Ghanbari (ali.ghanbari@utdallas.edu)
  */

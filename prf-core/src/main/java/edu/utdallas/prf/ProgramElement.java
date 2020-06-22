@@ -20,5 +20,11 @@ package edu.utdallas.prf;
  * #L%
  */
 
+/**
+ * The base class for all program element.
+ * A program element could be a <code>Class</code>, <code>Method</code>, or a <code>SourceLine</code>.
+ *
+ * @author Ali Ghanbari (ali.ghanbari@utdallas.edu)
+ */
 public interface ProgramElement {
 }

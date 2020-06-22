@@ -21,6 +21,10 @@ package edu.utdallas.prf;
  */
 
 /**
+ * A hash table mapping a test name to the set of classes covered by the test.
+ * Being a hash table, apparently, the object's <code>get</code> method shall
+ * return <code>null</code> in case a given test case covers no application classes.
+ *
  * @author Ali Ghanbari (ali.ghanbari@utdallas.edu)
  */
 public class ClassLevelCoverage extends CoverageInfo<Class> {

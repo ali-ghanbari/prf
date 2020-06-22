@@ -27,6 +27,8 @@ import java.io.Serializable;
 import java.util.Collection;
 
 /**
+ * This class represents a generated, compiled patch.
+ *
  * @author Ali Ghanbari (ali.ghanbari@utdallas.edu)
  */
 public class Patch implements Serializable {

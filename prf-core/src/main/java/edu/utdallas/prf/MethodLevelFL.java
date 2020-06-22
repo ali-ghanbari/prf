@@ -21,7 +21,9 @@ package edu.utdallas.prf;
  */
 
 /**
- * fully qualified method name (Javassist long name) -- suspiciousness value
+ * This is a hash table mapping a method to the suspiciousness value computed for
+ * that method. Being a hash table, apparently, the object's <code>get</code> method
+ * shall return <code>null</code> in case the given method is covered by no test case.
  *
  * @author Ali Ghanbari (ali.ghanbari@utdallas.edu)
  */

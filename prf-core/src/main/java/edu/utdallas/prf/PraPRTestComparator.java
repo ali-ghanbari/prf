@@ -33,6 +33,10 @@ import java.util.Map;
 import java.util.Set;
 
 /**
+ * A comparator used for test reordering during patch validation phase.
+ * (1) cheaper tests are preferred over longer ones;
+ * (2) failing tests are prioritized over passing ones.
+ *
  * @author Ali Ghanbari (ali.ghanbari@utdallas.edu)
  */
 public class PraPRTestComparator implements Comparator<TestUnit>, Serializable {

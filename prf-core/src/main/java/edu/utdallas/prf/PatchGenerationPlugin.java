@@ -21,10 +21,11 @@ package edu.utdallas.prf;
  */
 
 import java.io.Closeable;
-import java.io.File;
 import java.util.List;
 
 /**
+ * The interface for patch generation plugin.
+ *
  * @author Ali Ghanbari (ali.ghanbari@utdallas.edu)
  */
 public interface PatchGenerationPlugin extends PRFPluginBase, Closeable {

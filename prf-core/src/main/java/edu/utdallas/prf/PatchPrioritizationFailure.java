@@ -21,6 +21,8 @@ package edu.utdallas.prf;
  */
 
 /**
+ * A throwable to indicate a failure during patch prioritization.
+ *
  * @author Ali Ghanbari (ali.ghanbari@utdallas.edu)
  */
 public class PatchPrioritizationFailure extends Exception {

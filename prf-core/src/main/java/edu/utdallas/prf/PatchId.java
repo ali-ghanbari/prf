@@ -23,6 +23,9 @@ package edu.utdallas.prf;
 import java.io.Serializable;
 
 /**
+ * An object to uniquely identify a patch. This class is most useful for
+ * patch prioritization.
+ *
  * @author Ali Ghanbari (ali.ghanbari@utdallas.edu)
  */
 public class PatchId implements Serializable {

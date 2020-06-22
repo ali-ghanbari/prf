@@ -33,6 +33,20 @@
             <url>https://ali-ghanbari.github.io</url>
             <organization>University of Texas at Dallas</organization>
             <organizationUrl>https://cs.utdallas.edu</organizationUrl>
+            <roles>
+                <role>Ph.D. Student</role>
+                <role>Author</role>
+            </roles>
+        </developer>
+        <developer>
+            <name>Andrian (Andi) Marcus</name>
+            <email>amarcus@utdallas.edu</email>
+            <url>https://personal.utdallas.edu/~amarcus/</url>
+            <organization>University of Texas at Dallas</organization>
+            <organizationUrl>https://cs.utdallas.edu</organizationUrl>
+            <roles>
+                <role>Advisor</role>
+            </roles>
         </developer>
     </developers>
 

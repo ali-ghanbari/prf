@@ -21,8 +21,12 @@ package edu.utdallas.prf;
  */
 
 import java.io.Serializable;
-import java.util.Objects;
 
+/**
+ * A program element representing a class.
+ *
+ * @author Ali Ghanbari (ali.ghanbari@utdallas.edu)
+ */
 public class Class implements ProgramElement, Serializable {
     private static final long serialVersionUID = 1L;
 

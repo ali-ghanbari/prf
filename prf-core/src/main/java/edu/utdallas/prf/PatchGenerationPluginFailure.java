@@ -21,6 +21,8 @@ package edu.utdallas.prf;
  */
 
 /**
+ * Throwable used in case some failure occurs during patch generation.
+ *
  * @author Ali Ghanbari (ali.ghanbari@utdallas.edu)
  */
 public class PatchGenerationPluginFailure extends Exception {

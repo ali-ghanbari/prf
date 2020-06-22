@@ -24,6 +24,8 @@ import java.util.HashMap;
 import java.util.Set;
 
 /**
+ * The base class for coverage information at all levels of granularity.
+ *
  * @author Ali Ghanbari (ali.ghanbari@utdallas.edu)
  */
 public abstract class CoverageInfo<E extends ProgramElement> extends HashMap<String, Set<E>> {

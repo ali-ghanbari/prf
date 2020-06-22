@@ -21,6 +21,11 @@ package edu.utdallas.prf;
  */
 
 /**
+ * This is a hash table mapping a source line to the suspiciousness value computed for
+ * that line. A source line is modeled via a <code>Source</code> object. Being a hash
+ * table, apparently, the object's <code>get</code> method shall return <code>null</code>
+ * in case the given source line is covered by no test case.
+ *
  * @author Ali Ghanbari (ali.ghanbari@utdallas.edu)
  */
 public class LineLevelFL extends FaultLocalizationInfo<SourceLine> {

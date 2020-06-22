@@ -22,6 +22,11 @@ package edu.utdallas.prf;
 
 import java.io.Serializable;
 
+/**
+ * A program element representing a method.
+ *
+ * @author Ali Ghanbari (ali.ghanbari@utdallas.edu)
+ */
 public class Method implements ProgramElement, Serializable {
     private static final long serialVersionUID = 1L;
 

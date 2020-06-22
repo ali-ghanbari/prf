@@ -23,6 +23,8 @@ package edu.utdallas.prf;
 import java.util.HashMap;
 
 /**
+ * The base class for fault localization information at all levels of granularity.
+ *
  * @author Ali Ghanbari (ali.ghanbari@utdallas.edu)
  */
 public abstract class FaultLocalizationInfo <K extends ProgramElement> extends HashMap<K, Double> {

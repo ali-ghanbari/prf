@@ -23,9 +23,11 @@ package edu.utdallas.prf;
 import java.io.File;
 
 /**
+ * !!Internal use only!!
+ *
  * @author Ali Ghanbari (ali.ghanbari@utdallas.edu)
  */
-public interface PRFPluginBase {
+interface PRFPluginBase {
     // This method is called before any other methods
     void init();
 

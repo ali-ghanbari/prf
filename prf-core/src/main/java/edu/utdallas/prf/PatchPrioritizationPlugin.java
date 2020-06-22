@@ -25,6 +25,8 @@ import java.util.Collection;
 import java.util.List;
 
 /**
+ * The interface for patch prioritization plugin.
+ *
  * @author Ali Ghanbari (ali.ghanbari@utdallas.edu)
  */
 public interface PatchPrioritizationPlugin extends PRFPluginBase, Closeable {

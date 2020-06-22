@@ -32,6 +32,9 @@ import java.io.Serializable;
 import java.util.Objects;
 
 /**
+ * A class bundling all the information about a given patch, e.g., compiled class file,
+ * patched class name, source file, etc.
+ *
  * @author Ali Ghanbari (ali.ghanbari@utdallas.edu)
  */
 public class PatchLocation implements Serializable {

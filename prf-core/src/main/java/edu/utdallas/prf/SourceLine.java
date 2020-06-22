@@ -24,6 +24,9 @@ import java.io.Serializable;
 import java.util.Objects;
 
 /**
+ * A program element representing a source code line.
+ * A source code line is modeled using the pair (file name, line number).
+ *
  * @author Ali Ghanbari (ali.ghanbari@utdallas.edu)
  */
 public class SourceLine implements ProgramElement, Serializable {
