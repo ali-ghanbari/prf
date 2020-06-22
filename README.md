@@ -9,11 +9,6 @@
     * [Example 2: Math-65 of Defects4J](#example-2-math-65-of-defects4j)
     * [YouTube Demo Video](#youtube-demo-video)
 - [Developing PRF Plugins](#developing-prf-plugins)
-    * [Developing Patch Generation Plugin](#developing-patch-generation-pluging)
-    * [Developing Patch Prioritization/Filtering Plugin](#developing-patch-prioritization-filtering-pluging) 
-- [PRF Reports](#prf-reports)
-    * [Ranked Patches](#ranked-patches)
-    * [Other Artifacts](#other-artifacts)
 - [System Requirements](#system-requirements)
 - [Empirical Analysis](#empirical-analysis)
 
@@ -126,7 +121,7 @@ in the `pom.xml` of the target project.
         <!--        ...                                                             -->
         <!--        <parameterN>Value for parameter N</parameterN>                  -->
         <!--    </parameters>                                                       -->
-        <!-- </patchGenerationPlugin>                                                -->
+        <!-- </patchGenerationPlugin>                                               -->
 
 <!-- ************************** PATCH VALIDATOR OPTIONS *************************** -->
 
@@ -145,7 +140,7 @@ in the `pom.xml` of the target project.
         <!--    </parameters>                                                       -->
         <!-- </patchPrioritizationPlugin>                                           -->
 
-<!-- ****************************** GENERIC OPTIONS ******************************* -->
+<!-- ****************************** GENERAL OPTIONS ******************************* -->
 
         <!-- <whiteListPrefix>${project.groupId}</whiteListPrefix>                  -->
         <!-- <targetTests>                                                          -->
@@ -229,13 +224,13 @@ used). After naming a patch generation plugin, depending on the plugin, the user
 want to pass one or more arguments to the plugin. Arguments are specified using a
 key-value format, written in `<key>value</key>` form under the tag `<parameters>` under
 `<patchGenerationPlugin>`. The user might pass arbitrary number of parameters to the
-plugin. As an example, in order to run CapGen patch generation plugin on the bug Chart-1
+plugin. For example, in order to run CapGen patch generation plugin on the bug Chart-1
 from Defects4J, I had to add the plugin as follows.
 
 ```xml
 <patchGenerationPlugin>
     <name>capgen</name>
-	<parameters>
+    <parameters>
         <launcherJDKHomeDirectory>/Library/Java/JavaVirtualMachines/jdk1.8.0_231.jdk/Contents/Home</launcherJDKHomeDirectory>
         <subject>Chart</subject>
         <bugId>1</bugId>
@@ -243,84 +238,69 @@ from Defects4J, I had to add the plugin as follows.
 </patchGenerationPlugin>
 ``` 
 
-Please note that the name of plugin is case-insensitive.
+Please note that if the user wishes to use a custom patch generation plugin, they want
+to put the plugin on the classpath by specifying a dependency after closing
+`<configuration>` tag. For example, for CapGen patch generation plugin we have to
+use the following dependency specification.
 
+```xml
+<dependencies>
+    <dependency>
+        <groupId>edu.utdallas</groupId>
+        <artifactId>capgen-prf-plugin</artifactId>
+        <version>1.0-SNAPSHOT</version>
+    </dependency>
+</dependencies>
+```
 
+#### Patch Validator Options
+Patch validator is a subsystem of PRF that given a pool of generated patches runs
+the existing test suite against each patch to find the patches that pass all the
+test cases, a.k.a. plausible patches. In order to do it efficiently, and to use the
+full power of modern microprocessors, PRF validates patches in parallel using a
+work-stealing algorithm. The degree of parallelism can be specified using the
+parameter `<parallelism>`. By default, this value is 0, meaning that all the available
+CPU cores shall be used to validates patches parallely. Any value less than 0 or
+greater than or equal the number of available CPU cores have the same effect.
+The user can request for sequential patch validation by setting `<parallelism>`
+to 1 or opt for lower degree of parallelism. 
 
-ObjSim uses groupId of the target project to identify the application classes
-of the target project during instrumentation. This default action can be customized
-via the tag `<whiteListPrefix>`. The user can write their desired prefix of classes
-to be instrumented. Please note that ObjSim expects that `<whiteListPrefix>`
-includes all the patched method mentioned in the input CSV file. 
+As we have mentioned in our paper, patching sometimes might create infinite loops.
+In theory there is no way to know that upfront, but by setting a timeout for test
+execution, one is more likely to identify and filter out such patches. To that end,
+PRF receives two arguments from the user: `<timeoutConstant>` and `<timeoutPercent>`.
+The timeout for a test case `t` is calculated by `<timeoutConstant> + (1 + <timeoutPercent>) * t(T)`,
+where `T(t)` denotes the original execution time for the test case (measured in the
+profiling phase). Default values for `<timeoutConstant>` and `<timeoutPercent>` are
+5000 and 0.5, respectively. Therefore, a test case taking more than 1.5 times of its
+original execution time plus 5 seconds, is deemed timed out. A patched with at least
+one timed out test is deemed timed out and shall not be reported to the user. 
+
+#### Fix Report Generator Options
+Fix report generator, as the name suggests, is responsible for generating fix reports.
+This is nothing but showing the list of plausible patches (with enough information
+to enable the users to apply the patches) so that the user can find adopt the genuine
+fix for the bug among the plausible patches.
+
+By default, PRF uses `dummy-patch-prioritization-plugin` which simply puts the
+patches in an arbitrary order. However, the users can have their own patch
+prioritization plugin. Through the parameter `<patchPrioritizationPlugin>`, the
+users can specify the name of a patch generation plugin and pass parameters to
+the plugin. This is quite similar to what we have in the case of picking a custom
+patch generation plugin, and we don't feel it is necessary to repeat explaining the
+procedure here.
+
+#### General/System-wide Options
+PRF uses groupId of the target project to identify the application classes of
+the target project during profiling, patch validation, and fix report generation.
+This default action can be customized via the tag `<whiteListPrefix>`. The user
+can write their desired prefix of classes to be considered as application classes.
 
 Last but not least, since test cases of some large and complex projects might
 be demanding, we have provided the user with a mechanism through which they
 can specify the maximum amount of allotted heap space (and/or permanent
-generation space, if applicable) for the child _profiler_ processes. Profiler
-processes, as described in the paper, are responsible for executing test cases
-against the original and patched program and collect information about the
-system state right at the exit point(s) of the specified patched method.
-
-In the rest of this section, we discuss the format of input CSV file expected
-by ObjSim Maven plugin and the way you can automatically generate the file
-for a Maven project on which PraPR is already applied.
-
-As we have already discussed in the paper, the input CSV file is expected
-to consist of the five columns as follows.
-```text
-Id, Susp, Method, Class-File, Covering-Tests
-```
-Each row of this file corresponds to a patch, wherein `Id` is an integer
-identifier for the patch, `Susp` is the suspiciousness value of the patched
-location corresponding to the patch, `Method` is fully qualified name and
-signature of the patched method, `Class-File` is the path to the patched
-class file (if you are using a source code-level APR, you can compile the
-patched class file to get the desired `.class` file), and `Covering-Tests`
-denotes the space-separated list of fully qualified test case names covering
-the patched location corresponding to the patch. Please note that one can
-list all the test cases of the program here in case covering test cases
-are not available. We stress that using covering test cases is preferable
-only due to performance considerations during profiling.
-
-As for the patches generated by PraPR, the script `input-file-generator`
-that we have included in this repository, generated the information described
-above in the following way. `Id` corresponds to the patch number located in
-LOG fix report generated by PraPR (LOG fix reports of PraPR are stored in
-`target/prapr-reports/*/fix-report.log`). The values of `Susp` and `Method`
-are obtained from the XML report generated by PraPR (compressed XML report
-of PraPR are stored in `target/prapr-reports/*/mutations.xml.gz`). It is
-worth noting that suspiciousness values computed by PraPR are based on
-well-known Ochiai formula, but any other suspiciousness formula can also
-be used. `Class-File` is intended to point to the class file corresponding
-to the patch which in case of PraPR is stored with the name `mutant-*.class`
-under the directory `target/prapr-reports/*/pool/`. Lastly, the script
-extracts the test cases covering patched location corresponding to each patch
-from the XML report of PraPR.
-
-With that said, in order for our script find the required information, PraPR
-should be configure to produce both LOG and XML file as well as the flag
-`verboseReport` should be set to true so that the tool dumps all the class
-files in the `pool` folder.
-
-After running PraPR with the aforementioned configurations, if the tool is
-able to find more than one plausible patch, you can follow the steps
-instructed below to produce the desired input CSV file.
-
-**Step 0:** Please make sure the environment variable `JAVA_HOME` points
-to the home directory of JDK 1.8. Please also make sure that there are
-one or more patches listed in the LOG report in
-`target/prapr-reports/*/fix-report.log`, the XML report
-`target/prapr-reports/*/mutations.xml.gz`
-exists, and the directory `target/prapr-reports/*/pool/` contains one
-or more `.class` files.
-
-**Step 1:** Assuming that ObjSim's base directory is in system `PATH`,
-you may use the following command to generate the desired `input-file.csv`.
-```shell script
-input-file-generator target/prapr-reports/*/
-```
-After running the tool, you can find the file `input-file.csv` stored
-in the base directory of the target project.
+generation space, if applicable) for the child _profiler_ or _validator_
+processes.
 
 ## PRF Demonstration
 In order to get a feeling of how PRF operates with a patch generation
@@ -416,7 +396,7 @@ cd examples
 cd Math_65_buggy
 # Please make sure you have configured the POM file as described in the previous example
 mvn clean test -DskipTests  -Dhttps.protocols=TLSv1.2
-mvn edu.utdallas:objsim:validate -Dhttps.protocols=TLSv1.2
+mvn edu.utdallas:prf-maven-plugin:run -Dhttps.protocols=TLSv1.2
 ```
 After seeing (green) `BUILD SUCCESS` message, due to the last command,
 you will be able to review the fix report that appears above the 
@@ -440,9 +420,50 @@ Patch:
 You can watch our demo [YouTube video](https://bit.ly/3ehduSS) showing how you can
 setup PRF and apply it on one of the example projects.
 
-### Ranked Patches
+## Developing PRF Plugins
+Currently, PRF is extendible via two kinds of plugins, namely patch generation plugin
+and patch prioritization plugin. Developers of APR prototypes, can construct their own
+patch generation/prioritization plugin by implementing the two interfaces provided by
+the PRF framework. In this section, we only explain how the developers can make their
+own patch generation plugin; making a custom patch prioritization plugin is similar,
+and we omit the details.
 
-### Other Artifacts
+The first step is to import the companion library of PRF into the plugin's project.
+After [installing](#prf-setup) the library will be available at the Maven local repo.
+Thus, if the developer uses Maven to make their plugin, they can use the following 
+XML snippet to import the library into their project.
+
+```xml
+<dependencies>
+    <!-- ... -->
+    <dependency>
+        <groupId>edu.utdallas</groupId>
+        <artifactId>prf-core</artifactId>
+        <version>1.0-SNAPSHOT</version>
+    </dependency>
+</dependencies>
+``` 
+
+In case the developer uses Gradle as their build system, they can use the following
+command in their build script (provided that Gradle is configured to look into the
+correct repository).
+
+```groovy
+implementation 'edu.utdallas:prf-core:1.0-SNAPSHOT'
+``` 
+
+After importing the library, implementing the interface `PatchGenerationPlugin` is
+all the developer needs to do. Implementing the interface is more or less
+application-specific and we cannot say much about it here. One thing that we want to
+mention at this point is to defining the name of the plugin. Any class implementing
+`PatchGenerationPlugin` has to implement a method named `name`. This method receives
+void and returns a `String`. The string value is intended to be the name of the plugin.
+This value is compared (in a case-insensitive) manner with the name provided in
+`<patchGenerationPlugin>` in the target POM file. Another method with the same signature
+is `description`. This method is intended to return a short description of the plugin.
+This description is to be displayed on the screen by PRF. We have documented the intent
+of the classes and method using JavaDoc, and we suggest reviewing the documentation
+in the code.
 
 ## System Requirements
 PRF is a pure Java program, so it is platform independent. Be that as it
