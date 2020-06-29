@@ -27,7 +27,7 @@ import java.io.File;
  *
  * @author Ali Ghanbari (ali.ghanbari@utdallas.edu)
  */
-interface PRFPluginBase {
+public interface PRFPluginBase {
     // This method is called before any other methods
     void init();
 
