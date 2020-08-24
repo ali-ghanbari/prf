@@ -1,5 +1,7 @@
 # PRF: A Framework for Building Automatic Program Repair Prototypes for JVM-based Language
 
+![prf-logo](prf-logo-small.png)
+
 ## Table of Contents
 - [Introduction](#introduction)
 - [PRF Setup](#prf-setup)
