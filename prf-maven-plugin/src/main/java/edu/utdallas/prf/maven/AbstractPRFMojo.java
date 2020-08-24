@@ -20,6 +20,7 @@ package edu.utdallas.prf.maven;
  * #L%
  */
 
+import edu.utdallas.memo.commons.functional.PredicateFactory;
 import edu.utdallas.prf.DummyPatchGenerationPlugin;
 import edu.utdallas.prf.DummyPatchPrioritizationPlugin;
 import edu.utdallas.prf.PRFEntryPoint;
@@ -28,6 +29,7 @@ import edu.utdallas.prf.PatchGenerationPlugin;
 import edu.utdallas.prf.PatchPrioritizationPlugin;
 import edu.utdallas.prf.commons.misc.MemberNameUtils;
 import edu.utdallas.prf.commons.misc.PropertyUtils;
+import edu.utdallas.prf.profiler.cg.CGOptions;
 import edu.utdallas.prf.profiler.fl.FLOptions;
 import edu.utdallas.prf.profiler.fl.FLStrategy;
 import edu.utdallas.prf.profiler.fl.FLStrategyImpl;
@@ -44,15 +46,12 @@ import org.pitest.classpath.ClassPath;
 import org.pitest.classpath.ClassPathByteArraySource;
 import org.pitest.classpath.ClassloaderByteArraySource;
 import org.pitest.functional.Option;
-import org.pitest.functional.predicate.Or;
 import org.pitest.functional.predicate.Predicate;
-import org.pitest.util.Glob;
 import org.reflections.Reflections;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -70,6 +69,8 @@ public class AbstractPRFMojo extends AbstractMojo {
     }
 
     protected File compatibleJREHome;
+
+    private Predicate<String> appClassFilter;
 
     protected Predicate<String> testClassFilter;
 
@@ -90,26 +91,35 @@ public class AbstractPRFMojo extends AbstractMojo {
     // -----------------------
 
     /**
-     * This parameter is used in discovering application classes. A class shall
-     * be considered application class if its full name starts with
-     * <code>whiteListPrefix</code>
+     * Whitelists application classes for instrumentation and repair.
+     * It is in the form of a set of regular expressions.
+     * By default, "${project.groupId}.*" shall be used to determine application classes.
      */
-    @Parameter(property = "whiteListPrefix", defaultValue = "${project.groupId}")
-    protected String whiteListPrefix;
+    @Parameter(property = "targetClasses")
+    protected Set<String> targetClasses;
+
+    /**
+     * Regular expression used to exclude classes.
+     */
+    @Parameter(property = "excludedClasses")
+    protected Set<String> excludedClasses;
 
     /**
      * Using this parameter one can narrow down the space of selected test cases
      * during profiling and patch validation.
-     * By default:
-     *  {whiteListPrefix}.*Test, and
-     *  {whiteListPrefix}.*Tests
-     * shall be used.
+     * It is in the form of a set of regular expressions.
      */
     @Parameter(property = "targetTests")
-    protected Collection<String> targetTests;
+    protected Set<String> targetTests;
 
     /**
-     * A list of failing test cases: a patch is considered plausible if it
+     * A set of regular expressions used to exclude tests.
+     */
+    @Parameter(property = "excludedTests")
+    protected Set<String> excludedTests;
+
+    /**
+     * A set of failing test cases: a patch is considered plausible if it
      * does not introduce regression and passes all these failing tests
      *
      * If you leave this parameter unspecified, PRF shall infer failing test
@@ -118,7 +128,7 @@ public class AbstractPRFMojo extends AbstractMojo {
      * is difficult.
      */
     @Parameter(property = "failingTests")
-    protected Collection<String> failingTests;
+    protected Set<String> failingTests;
 
     /**
      * A timeout constant of 5000 means that we have to wait at least 5 second to
@@ -189,6 +199,9 @@ public class AbstractPRFMojo extends AbstractMojo {
     @Parameter(property = "flStrategy", defaultValue = "OCHIAI")
     protected String flStrategy;
 
+    @Parameter(property = "cgOptions", defaultValue = "OFF")
+    protected CGOptions cgOptions;
+
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
         validateAndSanitizeParameters();
@@ -198,7 +211,7 @@ public class AbstractPRFMojo extends AbstractMojo {
 
         try {
             PRFEntryPoint.createEntryPoint()
-                    .withWhiteListPrefix(this.whiteListPrefix)
+                    .withAppClassFilter(this.appClassFilter)
                     .withByteArraySource(byteArraySource)
                     .withChildProcessArguments(this.childJVMArgs)
                     .withClassPath(classPath)
@@ -233,22 +246,36 @@ public class AbstractPRFMojo extends AbstractMojo {
             throw new MojoFailureException("Invalid JAVA_HOME");
         }
 
-        if (this.whiteListPrefix.isEmpty()) {
-            getLog().warn("Missing whiteListPrefix");
-            this.whiteListPrefix = this.project.getGroupId();
-            getLog().info("Using " + this.whiteListPrefix + " as whiteListPrefix");
-        }
+        final String groupId = this.project.getGroupId();
 
-        if (this.targetTests == null || this.targetTests.isEmpty()) {
-            getLog().warn("Missing targetTests");
-            this.testClassFilter = new Or<>(Glob.toGlobPredicates(Arrays.asList(
-                    String.format("%s.*Test", this.whiteListPrefix),
-                    String.format("%s.*Tests", this.whiteListPrefix)
-            )));
-            getLog().info("Using " + this.whiteListPrefix + ".*Test(s)? as test-class filter");
-        } else {
-            this.testClassFilter = new Or<>(Glob.toGlobPredicates(this.targetTests));
+        if (this.excludedClasses == null) {
+            this.excludedClasses = Collections.emptySet();
         }
+        final Predicate<String> excludedClassFilter = PredicateFactory.orGlobs(this.excludedClasses);
+
+        if (this.targetClasses == null) {
+            this.targetClasses = new HashSet<>();
+        }
+        if (this.targetClasses.isEmpty()) {
+            this.targetClasses.add(groupId + ".*");
+        }
+        this.appClassFilter = PredicateFactory.orGlobs(this.targetClasses);
+        this.appClassFilter = PredicateFactory.and(this.appClassFilter, PredicateFactory.not(excludedClassFilter));
+
+        if (this.excludedTests == null) {
+            this.excludedTests = Collections.emptySet();
+        }
+        final Predicate<String> excludedTestFilter = PredicateFactory.orGlobs(this.excludedTests);
+
+        if (this.targetTests == null) {
+            this.targetTests = new HashSet<>();
+        }
+        if (this.targetTests.isEmpty()) {
+            this.targetTests.add(String.format("%s*Test", groupId));
+            this.targetTests.add(String.format("%s*Tests", groupId));
+        }
+        this.testClassFilter = PredicateFactory.orGlobs(this.targetTests);
+        this.testClassFilter = PredicateFactory.and(this.testClassFilter, PredicateFactory.not(excludedTestFilter));
 
         if (this.timeoutConstant < 0L) {
             throw new MojoFailureException("Invalid timeout bias");

@@ -1,8 +1,8 @@
-package edu.utdallas.prf.profiler;
+package edu.utdallas.prf.commons.functional;
 
 /*
  * #%L
- * prf-plugin
+ * prf-core
  * %%
  * Copyright (C) 2020 The University of Texas at Dallas
  * %%
@@ -20,30 +20,15 @@ package edu.utdallas.prf.profiler;
  * #L%
  */
 
-import org.apache.commons.lang3.Validate;
 import org.pitest.functional.predicate.Predicate;
 
 import java.io.Serializable;
-import java.util.Collection;
 
 /**
+ *
+ * @param <T>
  * @author Ali Ghanbari (ali.ghanbari@utdallas.edu)
  */
-class ProfilerArguments implements Serializable {
-    private static final long serialVersionUID = 1L;
+public interface SerializablePredicate<T extends Serializable> extends Predicate<T>, Serializable {
 
-    final Predicate<String> appClassFilter;
-
-    final Collection<String> testClassNames;
-
-    final ProfilerOptions options;
-
-    protected ProfilerArguments(final Predicate<String> appClassFilter,
-                                final Collection<String> testClassNames,
-                                final ProfilerOptions options) {
-        Validate.isInstanceOf(Serializable.class, testClassNames);
-        this.appClassFilter = appClassFilter;
-        this.testClassNames = testClassNames;
-        this.options = options;
-    }
 }

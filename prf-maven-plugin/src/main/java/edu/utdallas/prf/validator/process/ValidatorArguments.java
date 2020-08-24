@@ -23,6 +23,7 @@ package edu.utdallas.prf.validator.process;
 import edu.utdallas.prf.Patch;
 import edu.utdallas.prf.PraPRTestComparator;
 import org.apache.commons.lang3.Validate;
+import org.pitest.functional.predicate.Predicate;
 
 import java.io.Serializable;
 import java.util.Collection;
@@ -33,7 +34,7 @@ import java.util.Collection;
 class ValidatorArguments implements Serializable {
     private static final long serialVersionUID = 1L;
 
-    final String whiteListPrefix;
+    final Predicate<String> appClassFilter;
 
     final Collection<String> testClassNames;
 
@@ -45,14 +46,14 @@ class ValidatorArguments implements Serializable {
 
     final Patch patch;
 
-    public ValidatorArguments(final String whiteListPrefix,
+    public ValidatorArguments(final Predicate<String> appClassFilter,
                               final Collection<String> testClassNames,
                               final PraPRTestComparator testComparator,
                               final long timeoutConstant,
                               final double timeoutPercent,
                               final Patch patch) {
         Validate.isInstanceOf(Serializable.class, testClassNames);
-        this.whiteListPrefix = whiteListPrefix;
+        this.appClassFilter = appClassFilter;
         this.testClassNames = testClassNames;
         this.testComparator = testComparator;
         this.timeoutConstant = timeoutConstant;

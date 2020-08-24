@@ -21,6 +21,7 @@ package edu.utdallas.prf.profiler.fl;
  */
 
 import edu.utdallas.prf.commons.relational.StringDomain;
+import org.pitest.functional.predicate.Predicate;
 
 import java.lang.instrument.ClassFileTransformer;
 import java.lang.instrument.IllegalClassFormatException;
@@ -34,10 +35,14 @@ import java.security.ProtectionDomain;
  * @author Ali Ghanbari (ali.ghanbari@utdallas.edu)
  */
 public abstract class CovRecTransformer implements ClassFileTransformer {
-    protected final String whiteListPrefix;
+    protected final Predicate<String> appClassFilter;
 
-    public CovRecTransformer(final String whiteListPrefix) {
-        this.whiteListPrefix = whiteListPrefix.replace('.', '/');
+    public CovRecTransformer(final Predicate<String> appClassFilter) {
+        this.appClassFilter = appClassFilter;
+    }
+
+    private boolean isAppClass(final String className) {
+        return this.appClassFilter.apply(className.replace('/', '.'));
     }
 
     @Override
@@ -46,7 +51,7 @@ public abstract class CovRecTransformer implements ClassFileTransformer {
                             final Class<?> classBeingRedefined,
                             final ProtectionDomain protectionDomain,
                             final byte[] classfileBuffer) throws IllegalClassFormatException {
-        if (!className.startsWith(this.whiteListPrefix)) {
+        if (!isAppClass(className)) {
             return null; // no transformation
         }
         return transform(className, classfileBuffer);

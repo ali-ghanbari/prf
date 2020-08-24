@@ -32,6 +32,7 @@ import edu.utdallas.prf.profiler.fl.ClassLevelCovRecTransformer;
 import edu.utdallas.prf.profiler.fl.LineLevelCovRecTransformer;
 import edu.utdallas.prf.profiler.fl.MethodLevelCovRecTransformer;
 import org.pitest.boot.HotSwapAgent;
+import org.pitest.functional.predicate.Predicate;
 import org.pitest.process.ProcessArgs;
 import org.pitest.testapi.Description;
 import org.pitest.testapi.ResultCollector;
@@ -60,10 +61,10 @@ public class Profiler {
 
             final FLOptions flOptions = options.flOptions;
             CoverageRecorder.setFLOptions(flOptions);
-            CovRecTransformer transformer = installFLTransformer(flOptions, arguments.whiteListPrefix);
+            CovRecTransformer transformer = installFLTransformer(flOptions, arguments.appClassFilter);
             if (transformer == null && options.collectCoverage) {
                 CoverageRecorder.setFLOptions(FLOptions.LINE_LEVEL);
-                transformer = new LineLevelCovRecTransformer(arguments.whiteListPrefix);
+                transformer = new LineLevelCovRecTransformer(arguments.appClassFilter);
                 HotSwapAgent.addTransformer(transformer);
             }
 
@@ -87,20 +88,20 @@ public class Profiler {
     }
 
     private static CovRecTransformer installFLTransformer(final FLOptions flOptions,
-                                                          final String whiteListPrefix) {
+                                                          final Predicate<String> appClassFilter) {
         CovRecTransformer transformer = null;
         switch (flOptions) {
             case CLASS_LEVEL:
                 System.out.println("INFO: Class level fault localization activated");
-                transformer = new ClassLevelCovRecTransformer(whiteListPrefix);
+                transformer = new ClassLevelCovRecTransformer(appClassFilter);
                 break;
             case METHOD_LEVEL:
                 System.out.println("INFO: Method level fault localization activated");
-                transformer = new MethodLevelCovRecTransformer(whiteListPrefix);
+                transformer = new MethodLevelCovRecTransformer(appClassFilter);
                 break;
             case LINE_LEVEL:
                 System.out.println("INFO: Line level fault localization activated");
-                transformer = new LineLevelCovRecTransformer(whiteListPrefix);
+                transformer = new LineLevelCovRecTransformer(appClassFilter);
         }
         if (transformer != null) {
             HotSwapAgent.addTransformer(transformer);
@@ -135,10 +136,10 @@ public class Profiler {
     }
 
     public static ProfilerResults runProfiler(final ProcessArgs defaultProcessArgs,
-                                              final String whiteListPrefix,
+                                              final Predicate<String> appClassFilter,
                                               final Collection<String> testClassNames,
                                               final ProfilerOptions options) {
-        final ProfilerArguments arguments = new ProfilerArguments(whiteListPrefix, testClassNames, options);
+        final ProfilerArguments arguments = new ProfilerArguments(appClassFilter, testClassNames, options);
         final ProfilerProcess process = new ProfilerProcess(defaultProcessArgs, arguments);
         try {
             process.start();

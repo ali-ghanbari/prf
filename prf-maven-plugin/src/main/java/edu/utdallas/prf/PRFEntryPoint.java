@@ -72,7 +72,7 @@ public class PRFEntryPoint {
 
     private final ClassByteArraySource byteArraySource;
 
-    private final String whiteListPrefix;
+    private final Predicate<String> appClassFilter;
 
     private final Predicate<String> testClassFilter;
 
@@ -114,7 +114,7 @@ public class PRFEntryPoint {
 
     private PRFEntryPoint(final ClassPath classPath,
                           final ClassByteArraySource byteArraySource,
-                          final String whiteListPrefix,
+                          final Predicate<String> appClassFilter,
                           final Predicate<String> testClassFilter,
                           final Collection<String> failingTests,
                           final File compatibleJREHome,
@@ -132,7 +132,7 @@ public class PRFEntryPoint {
                           final NamedPluginInfo patchPrioritizationPluginInfo) {
         this.classPath = classPath;
         this.byteArraySource = byteArraySource;
-        this.whiteListPrefix = whiteListPrefix;
+        this.appClassFilter = appClassFilter;
         this.testClassFilter = testClassFilter;
         this.failingTests = failingTests;
         this.compatibleJREHome = compatibleJREHome;
@@ -155,75 +155,75 @@ public class PRFEntryPoint {
     }
 
     public PRFEntryPoint withClassPath(final ClassPath classPath) {
-        return new PRFEntryPoint(classPath, this.byteArraySource, this.whiteListPrefix, this.testClassFilter, this.failingTests, this.compatibleJREHome, this.childProcessArguments, this.parallelism, this.timeoutConstant, this.timeoutPercent, this.collectCoverage, this.flOptions, this.flStrategy, this.mavenProject, this.patchGenerationPlugin, this.patchGenerationPluginInfo, this.patchPrioritizationPlugin, this.patchPrioritizationPluginInfo);
+        return new PRFEntryPoint(classPath, this.byteArraySource, this.appClassFilter, this.testClassFilter, this.failingTests, this.compatibleJREHome, this.childProcessArguments, this.parallelism, this.timeoutConstant, this.timeoutPercent, this.collectCoverage, this.flOptions, this.flStrategy, this.mavenProject, this.patchGenerationPlugin, this.patchGenerationPluginInfo, this.patchPrioritizationPlugin, this.patchPrioritizationPluginInfo);
     }
 
-    public PRFEntryPoint withWhiteListPrefix(final String whiteListPrefix) {
-        return new PRFEntryPoint(this.classPath, this.byteArraySource, whiteListPrefix, this.testClassFilter, this.failingTests, this.compatibleJREHome, this.childProcessArguments, this.parallelism, this.timeoutConstant, this.timeoutPercent, this.collectCoverage, this.flOptions, this.flStrategy, this.mavenProject, this.patchGenerationPlugin, this.patchGenerationPluginInfo, this.patchPrioritizationPlugin, this.patchPrioritizationPluginInfo);
+    public PRFEntryPoint withAppClassFilter(final Predicate<String> appClassFilter) {
+        return new PRFEntryPoint(this.classPath, this.byteArraySource, appClassFilter, this.testClassFilter, this.failingTests, this.compatibleJREHome, this.childProcessArguments, this.parallelism, this.timeoutConstant, this.timeoutPercent, this.collectCoverage, this.flOptions, this.flStrategy, this.mavenProject, this.patchGenerationPlugin, this.patchGenerationPluginInfo, this.patchPrioritizationPlugin, this.patchPrioritizationPluginInfo);
     }
 
     public PRFEntryPoint withTestClassFilter(final Predicate<String> testClassFilter) {
-        return new PRFEntryPoint(this.classPath, this.byteArraySource, this.whiteListPrefix, testClassFilter, this.failingTests, this.compatibleJREHome, this.childProcessArguments, this.parallelism, this.timeoutConstant, this.timeoutPercent, this.collectCoverage, this.flOptions, this.flStrategy, this.mavenProject, this.patchGenerationPlugin, this.patchGenerationPluginInfo, this.patchPrioritizationPlugin, this.patchPrioritizationPluginInfo);
+        return new PRFEntryPoint(this.classPath, this.byteArraySource, this.appClassFilter, testClassFilter, this.failingTests, this.compatibleJREHome, this.childProcessArguments, this.parallelism, this.timeoutConstant, this.timeoutPercent, this.collectCoverage, this.flOptions, this.flStrategy, this.mavenProject, this.patchGenerationPlugin, this.patchGenerationPluginInfo, this.patchPrioritizationPlugin, this.patchPrioritizationPluginInfo);
     }
 
     public PRFEntryPoint withFailingTests(final Collection<String> failingTests) {
-        return new PRFEntryPoint(this.classPath, this.byteArraySource, this.whiteListPrefix, this.testClassFilter, failingTests, this.compatibleJREHome, this.childProcessArguments, this.parallelism, this.timeoutConstant, this.timeoutPercent, this.collectCoverage, this.flOptions, this.flStrategy, this.mavenProject, this.patchGenerationPlugin, this.patchGenerationPluginInfo, this.patchPrioritizationPlugin, this.patchPrioritizationPluginInfo);
+        return new PRFEntryPoint(this.classPath, this.byteArraySource, this.appClassFilter, this.testClassFilter, failingTests, this.compatibleJREHome, this.childProcessArguments, this.parallelism, this.timeoutConstant, this.timeoutPercent, this.collectCoverage, this.flOptions, this.flStrategy, this.mavenProject, this.patchGenerationPlugin, this.patchGenerationPluginInfo, this.patchPrioritizationPlugin, this.patchPrioritizationPluginInfo);
     }
 
     public PRFEntryPoint withCompatibleJREHome(final File compatibleJREHome) {
-        return new PRFEntryPoint(this.classPath, this.byteArraySource, this.whiteListPrefix, this.testClassFilter, this.failingTests, compatibleJREHome, this.childProcessArguments, this.parallelism, this.timeoutConstant, this.timeoutPercent, this.collectCoverage, this.flOptions, this.flStrategy, this.mavenProject, this.patchGenerationPlugin, this.patchGenerationPluginInfo, this.patchPrioritizationPlugin, this.patchPrioritizationPluginInfo);
+        return new PRFEntryPoint(this.classPath, this.byteArraySource, this.appClassFilter, this.testClassFilter, this.failingTests, compatibleJREHome, this.childProcessArguments, this.parallelism, this.timeoutConstant, this.timeoutPercent, this.collectCoverage, this.flOptions, this.flStrategy, this.mavenProject, this.patchGenerationPlugin, this.patchGenerationPluginInfo, this.patchPrioritizationPlugin, this.patchPrioritizationPluginInfo);
     }
 
     public PRFEntryPoint withChildProcessArguments(final List<String> childProcessArguments) {
-        return new PRFEntryPoint(this.classPath, this.byteArraySource, this.whiteListPrefix, this.testClassFilter, this.failingTests, this.compatibleJREHome, childProcessArguments, this.parallelism, this.timeoutConstant, this.timeoutPercent, this.collectCoverage, this.flOptions, this.flStrategy, this.mavenProject, this.patchGenerationPlugin, this.patchGenerationPluginInfo, this.patchPrioritizationPlugin, this.patchPrioritizationPluginInfo);
+        return new PRFEntryPoint(this.classPath, this.byteArraySource, this.appClassFilter, this.testClassFilter, this.failingTests, this.compatibleJREHome, childProcessArguments, this.parallelism, this.timeoutConstant, this.timeoutPercent, this.collectCoverage, this.flOptions, this.flStrategy, this.mavenProject, this.patchGenerationPlugin, this.patchGenerationPluginInfo, this.patchPrioritizationPlugin, this.patchPrioritizationPluginInfo);
     }
 
     public PRFEntryPoint withByteArraySource(final ClassByteArraySource byteArraySource) {
-        return new PRFEntryPoint(this.classPath, byteArraySource, this.whiteListPrefix, this.testClassFilter, this.failingTests, this.compatibleJREHome, this.childProcessArguments, this.parallelism, this.timeoutConstant, this.timeoutPercent, this.collectCoverage, this.flOptions, this.flStrategy, this.mavenProject, this.patchGenerationPlugin, this.patchGenerationPluginInfo, this.patchPrioritizationPlugin, this.patchPrioritizationPluginInfo);
+        return new PRFEntryPoint(this.classPath, byteArraySource, this.appClassFilter, this.testClassFilter, this.failingTests, this.compatibleJREHome, this.childProcessArguments, this.parallelism, this.timeoutConstant, this.timeoutPercent, this.collectCoverage, this.flOptions, this.flStrategy, this.mavenProject, this.patchGenerationPlugin, this.patchGenerationPluginInfo, this.patchPrioritizationPlugin, this.patchPrioritizationPluginInfo);
     }
 
     public PRFEntryPoint withParallelismDegree(final int parallelism) {
-        return new PRFEntryPoint(this.classPath, this.byteArraySource, this.whiteListPrefix, this.testClassFilter, this.failingTests, this.compatibleJREHome, this.childProcessArguments, parallelism, this.timeoutConstant, this.timeoutPercent, this.collectCoverage, this.flOptions, this.flStrategy, this.mavenProject, this.patchGenerationPlugin, this.patchGenerationPluginInfo, this.patchPrioritizationPlugin, this.patchPrioritizationPluginInfo);
+        return new PRFEntryPoint(this.classPath, this.byteArraySource, this.appClassFilter, this.testClassFilter, this.failingTests, this.compatibleJREHome, this.childProcessArguments, parallelism, this.timeoutConstant, this.timeoutPercent, this.collectCoverage, this.flOptions, this.flStrategy, this.mavenProject, this.patchGenerationPlugin, this.patchGenerationPluginInfo, this.patchPrioritizationPlugin, this.patchPrioritizationPluginInfo);
     }
 
     public PRFEntryPoint withTimeoutConstant(final long timeoutConstant) {
-        return new PRFEntryPoint(this.classPath, this.byteArraySource, this.whiteListPrefix, this.testClassFilter, this.failingTests, this.compatibleJREHome, this.childProcessArguments, this.parallelism, timeoutConstant, this.timeoutPercent, this.collectCoverage, this.flOptions, this.flStrategy, this.mavenProject, this.patchGenerationPlugin, this.patchGenerationPluginInfo, this.patchPrioritizationPlugin, this.patchPrioritizationPluginInfo);
+        return new PRFEntryPoint(this.classPath, this.byteArraySource, this.appClassFilter, this.testClassFilter, this.failingTests, this.compatibleJREHome, this.childProcessArguments, this.parallelism, timeoutConstant, this.timeoutPercent, this.collectCoverage, this.flOptions, this.flStrategy, this.mavenProject, this.patchGenerationPlugin, this.patchGenerationPluginInfo, this.patchPrioritizationPlugin, this.patchPrioritizationPluginInfo);
     }
 
     public PRFEntryPoint withTimeoutPercent(final double timeoutPercent) {
-        return new PRFEntryPoint(this.classPath, this.byteArraySource, this.whiteListPrefix, this.testClassFilter, this.failingTests, this.compatibleJREHome, this.childProcessArguments, this.parallelism, this.timeoutConstant, timeoutPercent, this.collectCoverage, this.flOptions, this.flStrategy, this.mavenProject, this.patchGenerationPlugin, this.patchGenerationPluginInfo, this.patchPrioritizationPlugin, this.patchPrioritizationPluginInfo);
+        return new PRFEntryPoint(this.classPath, this.byteArraySource, this.appClassFilter, this.testClassFilter, this.failingTests, this.compatibleJREHome, this.childProcessArguments, this.parallelism, this.timeoutConstant, timeoutPercent, this.collectCoverage, this.flOptions, this.flStrategy, this.mavenProject, this.patchGenerationPlugin, this.patchGenerationPluginInfo, this.patchPrioritizationPlugin, this.patchPrioritizationPluginInfo);
     }
 
     public PRFEntryPoint withSystemUnderRepair(final MavenProject mavenProject) {
-        return new PRFEntryPoint(this.classPath, this.byteArraySource, this.whiteListPrefix, this.testClassFilter, this.failingTests, this.compatibleJREHome, this.childProcessArguments, this.parallelism, this.timeoutConstant, this.timeoutPercent, this.collectCoverage, this.flOptions, this.flStrategy, mavenProject, this.patchGenerationPlugin, this.patchGenerationPluginInfo, this.patchPrioritizationPlugin, this.patchPrioritizationPluginInfo);
+        return new PRFEntryPoint(this.classPath, this.byteArraySource, this.appClassFilter, this.testClassFilter, this.failingTests, this.compatibleJREHome, this.childProcessArguments, this.parallelism, this.timeoutConstant, this.timeoutPercent, this.collectCoverage, this.flOptions, this.flStrategy, mavenProject, this.patchGenerationPlugin, this.patchGenerationPluginInfo, this.patchPrioritizationPlugin, this.patchPrioritizationPluginInfo);
     }
 
     public PRFEntryPoint withFLOptions(final FLOptions flOptions) {
-        return new PRFEntryPoint(this.classPath, this.byteArraySource, this.whiteListPrefix, this.testClassFilter, this.failingTests, this.compatibleJREHome, this.childProcessArguments, this.parallelism, this.timeoutConstant, this.timeoutPercent, this.collectCoverage, flOptions, this.flStrategy, this.mavenProject, this.patchGenerationPlugin, this.patchGenerationPluginInfo, this.patchPrioritizationPlugin, this.patchPrioritizationPluginInfo);
+        return new PRFEntryPoint(this.classPath, this.byteArraySource, this.appClassFilter, this.testClassFilter, this.failingTests, this.compatibleJREHome, this.childProcessArguments, this.parallelism, this.timeoutConstant, this.timeoutPercent, this.collectCoverage, flOptions, this.flStrategy, this.mavenProject, this.patchGenerationPlugin, this.patchGenerationPluginInfo, this.patchPrioritizationPlugin, this.patchPrioritizationPluginInfo);
     }
 
     public PRFEntryPoint withFLStrategy(final FLStrategy flStrategy) {
-        return new PRFEntryPoint(this.classPath, this.byteArraySource, this.whiteListPrefix, this.testClassFilter, this.failingTests, this.compatibleJREHome, this.childProcessArguments, this.parallelism, this.timeoutConstant, this.timeoutPercent, this.collectCoverage, this.flOptions, flStrategy, this.mavenProject, this.patchGenerationPlugin, this.patchGenerationPluginInfo, this.patchPrioritizationPlugin, this.patchPrioritizationPluginInfo);
+        return new PRFEntryPoint(this.classPath, this.byteArraySource, this.appClassFilter, this.testClassFilter, this.failingTests, this.compatibleJREHome, this.childProcessArguments, this.parallelism, this.timeoutConstant, this.timeoutPercent, this.collectCoverage, this.flOptions, flStrategy, this.mavenProject, this.patchGenerationPlugin, this.patchGenerationPluginInfo, this.patchPrioritizationPlugin, this.patchPrioritizationPluginInfo);
     }
 
     public PRFEntryPoint withPatchGenerationPlugin(final PatchGenerationPlugin patchGenerationPlugin) {
-        return new PRFEntryPoint(this.classPath, this.byteArraySource, this.whiteListPrefix, this.testClassFilter, this.failingTests, this.compatibleJREHome, this.childProcessArguments, this.parallelism, this.timeoutConstant, this.timeoutPercent, this.collectCoverage, this.flOptions, this.flStrategy, this.mavenProject, patchGenerationPlugin, this.patchGenerationPluginInfo, this.patchPrioritizationPlugin, this.patchPrioritizationPluginInfo);
+        return new PRFEntryPoint(this.classPath, this.byteArraySource, this.appClassFilter, this.testClassFilter, this.failingTests, this.compatibleJREHome, this.childProcessArguments, this.parallelism, this.timeoutConstant, this.timeoutPercent, this.collectCoverage, this.flOptions, this.flStrategy, this.mavenProject, patchGenerationPlugin, this.patchGenerationPluginInfo, this.patchPrioritizationPlugin, this.patchPrioritizationPluginInfo);
     }
 
     public PRFEntryPoint withPatchGenerationPluginInfo(final NamedPluginInfo patchGenerationPluginInfo) {
-        return new PRFEntryPoint(this.classPath, this.byteArraySource, this.whiteListPrefix, this.testClassFilter, this.failingTests, this.compatibleJREHome, this.childProcessArguments, this.parallelism, this.timeoutConstant, this.timeoutPercent, this.collectCoverage, this.flOptions, this.flStrategy, this.mavenProject, this.patchGenerationPlugin, patchGenerationPluginInfo, this.patchPrioritizationPlugin, this.patchPrioritizationPluginInfo);
+        return new PRFEntryPoint(this.classPath, this.byteArraySource, this.appClassFilter, this.testClassFilter, this.failingTests, this.compatibleJREHome, this.childProcessArguments, this.parallelism, this.timeoutConstant, this.timeoutPercent, this.collectCoverage, this.flOptions, this.flStrategy, this.mavenProject, this.patchGenerationPlugin, patchGenerationPluginInfo, this.patchPrioritizationPlugin, this.patchPrioritizationPluginInfo);
     }
 
     public PRFEntryPoint withPatchPrioritizationPlugin(final PatchPrioritizationPlugin patchPrioritizationPlugin) {
-        return new PRFEntryPoint(this.classPath, this.byteArraySource, this.whiteListPrefix, this.testClassFilter, this.failingTests, this.compatibleJREHome, this.childProcessArguments, this.parallelism, this.timeoutConstant, this.timeoutPercent, this.collectCoverage, this.flOptions, this.flStrategy, this.mavenProject, patchGenerationPlugin, this.patchGenerationPluginInfo, patchPrioritizationPlugin, this.patchPrioritizationPluginInfo);
+        return new PRFEntryPoint(this.classPath, this.byteArraySource, this.appClassFilter, this.testClassFilter, this.failingTests, this.compatibleJREHome, this.childProcessArguments, this.parallelism, this.timeoutConstant, this.timeoutPercent, this.collectCoverage, this.flOptions, this.flStrategy, this.mavenProject, patchGenerationPlugin, this.patchGenerationPluginInfo, patchPrioritizationPlugin, this.patchPrioritizationPluginInfo);
     }
 
     public PRFEntryPoint withPatchPrioritizationPluginInfo(final NamedPluginInfo patchPrioritizationPluginInfo) {
-        return new PRFEntryPoint(this.classPath, this.byteArraySource, this.whiteListPrefix, this.testClassFilter, this.failingTests, this.compatibleJREHome, this.childProcessArguments, this.parallelism, this.timeoutConstant, this.timeoutPercent, this.collectCoverage, this.flOptions, this.flStrategy, this.mavenProject, this.patchGenerationPlugin, this.patchGenerationPluginInfo, this.patchPrioritizationPlugin, patchPrioritizationPluginInfo);
+        return new PRFEntryPoint(this.classPath, this.byteArraySource, this.appClassFilter, this.testClassFilter, this.failingTests, this.compatibleJREHome, this.childProcessArguments, this.parallelism, this.timeoutConstant, this.timeoutPercent, this.collectCoverage, this.flOptions, this.flStrategy, this.mavenProject, this.patchGenerationPlugin, this.patchGenerationPluginInfo, this.patchPrioritizationPlugin, patchPrioritizationPluginInfo);
     }
 
     public PRFEntryPoint withCollectCoverage(final boolean collectCoverage) {
-        return new PRFEntryPoint(this.classPath, this.byteArraySource, this.whiteListPrefix, this.testClassFilter, this.failingTests, this.compatibleJREHome, this.childProcessArguments, this.parallelism, this.timeoutConstant, this.timeoutPercent, collectCoverage, this.flOptions, this.flStrategy, this.mavenProject, this.patchGenerationPlugin, this.patchGenerationPluginInfo, this.patchPrioritizationPlugin, this.patchPrioritizationPluginInfo);
+        return new PRFEntryPoint(this.classPath, this.byteArraySource, this.appClassFilter, this.testClassFilter, this.failingTests, this.compatibleJREHome, this.childProcessArguments, this.parallelism, this.timeoutConstant, this.timeoutPercent, collectCoverage, this.flOptions, this.flStrategy, this.mavenProject, this.patchGenerationPlugin, this.patchGenerationPluginInfo, this.patchPrioritizationPlugin, this.patchPrioritizationPluginInfo);
     }
 
     public void run() throws NotFoundException, MojoFailureException {
@@ -356,7 +356,7 @@ public class PRFEntryPoint {
 
     private PatchValidator runPatchValidator(final Map<Patch, ValidationOutcome> validationStatusMap) {
         final PatchValidator validator = new WorkStealingValidator(this.defaultProcessArgs,
-                this.whiteListPrefix,
+                this.appClassFilter,
                 this.testClassNames,
                 this.testComparator,
                 this.timeoutConstant,
@@ -368,7 +368,7 @@ public class PRFEntryPoint {
     }
 
     private ProfilerResults runProfiler() {
-        return Profiler.runProfiler(this.defaultProcessArgs, this.whiteListPrefix, this.testClassNames, new ProfilerOptions(this.collectCoverage, this.flOptions, this.flStrategy));
+        return Profiler.runProfiler(this.defaultProcessArgs, this.appClassFilter, this.testClassNames, new ProfilerOptions(this.collectCoverage, this.flOptions, this.flStrategy));
     }
 
     private List<String> retrieveTestClassNames() {
@@ -391,15 +391,8 @@ public class PRFEntryPoint {
     }
 
     private ClassFilter defaultClassFilter() {
-        final Predicate<String> codeFilter = new Predicate<String>() {
-            @Override
-            public Boolean apply(String cn) {
-                return cn.startsWith(PRFEntryPoint.this.whiteListPrefix);
-            }
-        };
-        return new ClassFilter(this.testClassFilter, codeFilter);
+        return new ClassFilter(this.testClassFilter, this.appClassFilter);
     }
-
 
     private ProcessArgs getDefaultProcessArgs() {
         final LaunchOptions defaultLaunchOptions = new LaunchOptions(getJavaAgent(),

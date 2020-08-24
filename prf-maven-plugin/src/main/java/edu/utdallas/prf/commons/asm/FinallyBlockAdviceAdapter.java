@@ -22,6 +22,7 @@ package edu.utdallas.prf.commons.asm;
 
 import org.objectweb.asm.Label;
 import org.objectweb.asm.MethodVisitor;
+import org.objectweb.asm.commons.AdviceAdapter;
 
 import static org.objectweb.asm.Opcodes.ARETURN;
 import static org.objectweb.asm.Opcodes.ATHROW;
@@ -39,54 +40,23 @@ import static org.objectweb.asm.Opcodes.RETURN;
  *
  * @author Ali Ghanbari (ali.ghanbari@utdallas.edu)
  */
-public abstract class FinallyBlockAdviceAdapter extends MethodVisitor {
+public abstract class FinallyBlockAdviceAdapter extends AdviceAdapter {
     private final Label startFinally;
 
-    private int invokeSpecialSkips;
-
-    protected FinallyBlockAdviceAdapter(final int api, final MethodVisitor methodVisitor) {
-        this(api, methodVisitor, 0);
-    }
-
-    protected FinallyBlockAdviceAdapter(final int api,
-                                        final MethodVisitor methodVisitor,
-                                        final int invokeSpecialSkips) {
-        super(api, methodVisitor);
+    public FinallyBlockAdviceAdapter(final int api,
+                                     final MethodVisitor methodVisitor,
+                                     final int access,
+                                     final String name,
+                                     final String descriptor) {
+        super(api, methodVisitor, access, name, descriptor);
         this.startFinally = new Label();
-        this.invokeSpecialSkips = invokeSpecialSkips;
     }
 
     @Override
-    public void visitCode() {
-        super.visitCode();
-        if (this.invokeSpecialSkips == 0) {
-            insertPrelude();
-            this.invokeSpecialSkips = -1;
-        }
-    }
-
-    private void insertPrelude() {
-        onMethodEnter();
+    protected void onMethodEnter() {
+        insertPrelude();
         super.visitLabel(this.startFinally);
     }
-
-    @Override
-    public void visitMethodInsn(int opcode, String owner, String name, String descriptor, boolean isInterface) {
-        super.visitMethodInsn(opcode, owner, name, descriptor, isInterface);
-        if (opcode == INVOKESPECIAL) {
-            if (this.invokeSpecialSkips > 0) {
-                this.invokeSpecialSkips--;
-            }
-            if (this.invokeSpecialSkips == 0) {
-                insertPrelude();
-                this.invokeSpecialSkips = -1;
-            }
-        }
-    }
-
-    protected abstract void onMethodEnter();
-
-    protected abstract void onMethodExit(boolean normalExit);
 
     private boolean isReturnInst(int opcode) {
         switch (opcode) {
@@ -102,19 +72,22 @@ public abstract class FinallyBlockAdviceAdapter extends MethodVisitor {
     }
 
     @Override
-    public void visitInsn(int opcode) {
+    protected void onMethodExit(int opcode) {
         if (isReturnInst(opcode)) {
-            onMethodExit(true);
+            insertSequel(true);
         }
-        super.visitInsn(opcode);
     }
+
+    protected abstract void insertPrelude();
+
+    protected abstract void insertSequel(boolean normalExit);
 
     @Override
     public void visitMaxs(int maxStack, int maxLocals) {
         final Label endFinally = new Label();
         super.visitTryCatchBlock(this.startFinally, endFinally, endFinally, null);
         super.visitLabel(endFinally);
-        onMethodExit(false);
+        insertSequel(false);
         super.visitInsn(ATHROW);
         super.visitMaxs(maxStack, maxLocals);
     }

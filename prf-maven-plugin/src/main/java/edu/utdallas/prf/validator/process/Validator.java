@@ -28,6 +28,7 @@ import edu.utdallas.prf.commons.misc.PropertyUtils;
 import org.pitest.classinfo.CachingByteArraySource;
 import org.pitest.classinfo.ClassByteArraySource;
 import org.pitest.classpath.ClassloaderByteArraySource;
+import org.pitest.functional.predicate.Predicate;
 import org.pitest.mutationtest.execute.MemoryWatchdog;
 import org.pitest.process.ProcessArgs;
 import org.pitest.util.ExitCode;
@@ -65,7 +66,7 @@ public class Validator {
             ClassByteArraySource byteArraySource = new ClassloaderByteArraySource(IsolationUtils.getContextClassLoader());
             byteArraySource = new CachingByteArraySource(byteArraySource, CACHE_SIZE);
 
-            final ClassLoader loader = new SelectiveClassLoader(byteArraySource, arguments.whiteListPrefix, arguments.patch);
+            final ClassLoader loader = new SelectiveClassLoader(byteArraySource, arguments.appClassFilter, arguments.patch);
 
             final JUnitRunner runner = new JUnitRunner(loader, arguments.testClassNames, arguments.testComparator, true);
             final TestExecutionStatus status = runner.run(loader, arguments.patch.getCoveringTestsFilter(),
@@ -109,13 +110,13 @@ public class Validator {
     }
 
     public static ValidationOutcome runValidator(final ProcessArgs defaultProcessArgs,
-                                                 final String whiteListPrefix,
+                                                 final Predicate<String> appClassFilter,
                                                  final Collection<String> testClassNames,
                                                  final PraPRTestComparator testComparator,
                                                  final long timeoutConstant,
                                                  final double timeoutPercent,
                                                  final Patch patch) {
-        final ValidatorArguments arguments = new ValidatorArguments(whiteListPrefix, testClassNames, testComparator, timeoutConstant, timeoutPercent, patch);
+        final ValidatorArguments arguments = new ValidatorArguments(appClassFilter, testClassNames, testComparator, timeoutConstant, timeoutPercent, patch);
         final ValidatorProcess process = new ValidatorProcess(defaultProcessArgs, arguments);
         try {
             process.start();

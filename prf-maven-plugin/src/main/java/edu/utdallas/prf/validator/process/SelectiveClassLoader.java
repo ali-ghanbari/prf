@@ -26,6 +26,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.tuple.MutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.pitest.classinfo.ClassByteArraySource;
+import org.pitest.functional.predicate.Predicate;
 
 import java.io.File;
 import java.io.IOException;
@@ -38,15 +39,15 @@ import java.util.Map;
 public class SelectiveClassLoader extends ClassLoader {
     private final ClassByteArraySource byteArraySource;
 
-    private final String whiteListPrefix;
+    private final Predicate<String> appClassFilter;
 
     private final Map<String, Pair<File, byte[]>> patchedFileTable;
 
     public SelectiveClassLoader(final ClassByteArraySource byteArraySource,
-                                final String whiteListPrefix,
+                                final Predicate<String> appClassFilter,
                                 final Patch patch) {
         this.byteArraySource = byteArraySource;
-        this.whiteListPrefix = whiteListPrefix;
+        this.appClassFilter = appClassFilter;
         this.patchedFileTable = new HashMap<>();
         for (final PatchLocation location : patch.getLocations()) {
             final Pair<File, byte[]> pair = new MutablePair<>(location.getClassFile(), null);
@@ -73,7 +74,7 @@ public class SelectiveClassLoader extends ClassLoader {
                     }
                 }
                 return defineClass(name, bytes, 0, bytes.length);
-            } else if (name.startsWith(this.whiteListPrefix)) {
+            } else if (this.appClassFilter.apply(name)) {
                 final byte[] bytes = this.byteArraySource.getBytes(name).getOrElse(null);
                 if (bytes != null) {
                     return defineClass(name, bytes, 0, bytes.length);

@@ -20,7 +20,6 @@ package edu.utdallas.prf.profiler.fl;
  * #L%
  */
 
-import edu.utdallas.prf.commons.asm.MethodBodyUtils;
 import edu.utdallas.prf.commons.relational.StringDomain;
 import javassist.Modifier;
 import org.apache.commons.lang3.StringUtils;
@@ -30,10 +29,12 @@ import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.Label;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Type;
+import org.objectweb.asm.commons.GeneratorAdapter;
+import org.objectweb.asm.commons.Method;
 import org.pitest.bytecode.FrameOptions;
+import org.pitest.functional.predicate.Predicate;
 
 import static org.objectweb.asm.Opcodes.ASM7;
-import static org.objectweb.asm.Opcodes.INVOKESTATIC;
 
 import java.io.File;
 
@@ -41,12 +42,12 @@ import java.io.File;
  * @author Ali Ghanbari (ali.ghanbari@utdallas.edu)
  */
 public class LineLevelCovRecTransformer extends CovRecTransformer {
-    private static final String COVERAGE_RECORDER = Type.getInternalName(CoverageRecorder.class);
+    private static final Type COVERAGE_RECORDER = Type.getType(CoverageRecorder.class);
 
     private final StringDomain filesDom;
 
-    public LineLevelCovRecTransformer(final String whiteListPrefix) {
-        super(whiteListPrefix);
+    public LineLevelCovRecTransformer(final Predicate<String> appClassFilter) {
+        super(appClassFilter);
         this.filesDom = new StringDomain("F");
     }
 
@@ -112,25 +113,28 @@ public class LineLevelCovRecTransformer extends CovRecTransformer {
             if (this.isInterface || java.lang.reflect.Modifier.isAbstract(access) || java.lang.reflect.Modifier.isNative(access) || name.matches("<clinit>|<init>")) {
                 return defaultMethodVisitor;
             }
-            return new LLCovRecMethodVisitor(defaultMethodVisitor);
+            return new LLCovRecMethodVisitor(defaultMethodVisitor, access, name, descriptor);
         }
 
-        class LLCovRecMethodVisitor extends MethodVisitor {
+        class LLCovRecMethodVisitor extends GeneratorAdapter {
             private int currentLineNo;
 
             private int processedLineNo;
 
-            public LLCovRecMethodVisitor(final MethodVisitor methodVisitor) {
-                super(ASM7, methodVisitor);
+            public LLCovRecMethodVisitor(final MethodVisitor mv,
+                                         final int access,
+                                         final String name,
+                                         final String desc) {
+                super(ASM7, mv, access, name, desc);
             }
 
             @Override
             public void visitLabel(Label label) {
                 super.visitLabel(label);
                 if (this.currentLineNo != this.processedLineNo) {
-                    MethodBodyUtils.pushInteger(this.mv, sourceFileIndex);
-                    MethodBodyUtils.pushInteger(this.mv, this.currentLineNo);
-                    super.visitMethodInsn(INVOKESTATIC, COVERAGE_RECORDER, "markSourceLine", "(II)V", false);
+                    push(sourceFileIndex);
+                    push(this.currentLineNo);
+                    invokeStatic(COVERAGE_RECORDER, Method.getMethod("void markSourceLine(int,int)"));
                     this.processedLineNo = this.currentLineNo;
                 }
             }
@@ -139,11 +143,6 @@ public class LineLevelCovRecTransformer extends CovRecTransformer {
             public void visitLineNumber(int line, Label start) {
                 this.currentLineNo = line;
                 super.visitLineNumber(line, start);
-            }
-
-            @Override
-            public void visitMaxs(int maxStack, int maxLocals) {
-                super.visitMaxs(2 + maxStack, maxLocals);
             }
         }
     }

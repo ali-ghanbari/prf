@@ -33,6 +33,7 @@ import java.util.concurrent.RecursiveAction;
 import edu.utdallas.prf.validator.process.ValidationOutcome;
 import edu.utdallas.prf.validator.process.Validator;
 import org.apache.commons.lang3.Validate;
+import org.pitest.functional.predicate.Predicate;
 import org.pitest.process.ProcessArgs;
 
 /**
@@ -41,7 +42,7 @@ import org.pitest.process.ProcessArgs;
 public class WorkStealingValidator extends RecursiveAction implements PatchValidator {
     private final ProcessArgs defaultProcessArgs;
 
-    private final String whiteListPrefix;
+    private final Predicate<String> appClassFilter;
 
     private final Collection<String> testClassNames;
 
@@ -64,7 +65,7 @@ public class WorkStealingValidator extends RecursiveAction implements PatchValid
     private final Map<Patch, ValidationOutcome> validationStatusMap;
 
     private WorkStealingValidator(final ProcessArgs defaultProcessArgs,
-                                  final String whiteListPrefix,
+                                  final Predicate<String> appClassFilter,
                                   final Collection<String> testClassNames,
                                   final PraPRTestComparator testComparator,
                                   final long timeoutConstant,
@@ -75,7 +76,7 @@ public class WorkStealingValidator extends RecursiveAction implements PatchValid
                                   final Map<Patch, ValidationOutcome> validationStatusMap) {
         Validate.isTrue(low <= high);
         this.defaultProcessArgs = defaultProcessArgs;
-        this.whiteListPrefix = whiteListPrefix;
+        this.appClassFilter = appClassFilter;
         this.testClassNames = testClassNames;
         this.testComparator = testComparator;
         this.timeoutConstant = timeoutConstant;
@@ -87,19 +88,19 @@ public class WorkStealingValidator extends RecursiveAction implements PatchValid
     }
 
     public WorkStealingValidator(final ProcessArgs defaultProcessArgs,
-                                 final String whiteListPrefix,
+                                 final Predicate<String> appClassFilter,
                                  final Collection<String> testClassNames,
                                  final PraPRTestComparator testComparator,
                                  final long timeoutConstant,
                                  final double timeoutPercent,
                                  final Collection<Patch> patches,
                                  final Map<Patch, ValidationOutcome> validationStatusMap) {
-        this(defaultProcessArgs, whiteListPrefix, testClassNames, testComparator, timeoutConstant, timeoutPercent, new ArrayList<>(patches), 0, patches.size() - 1, validationStatusMap);
+        this(defaultProcessArgs, appClassFilter, testClassNames, testComparator, timeoutConstant, timeoutPercent, new ArrayList<>(patches), 0, patches.size() - 1, validationStatusMap);
     }
 
     private void validate(final Patch patch) {
         final ValidationOutcome outcome = Validator.runValidator(this.defaultProcessArgs,
-                this.whiteListPrefix,
+                this.appClassFilter,
                 this.testClassNames,
                 this.testComparator,
                 this.timeoutConstant,
@@ -121,7 +122,7 @@ public class WorkStealingValidator extends RecursiveAction implements PatchValid
     }
 
     private WorkStealingValidator duplicate(final int low, final int high) {
-        return new WorkStealingValidator(this.defaultProcessArgs, this.whiteListPrefix, this.testClassNames, this.testComparator, this.timeoutConstant, this.timeoutPercent, this.patches, low, high, this.validationStatusMap);
+        return new WorkStealingValidator(this.defaultProcessArgs, this.appClassFilter, this.testClassNames, this.testComparator, this.timeoutConstant, this.timeoutPercent, this.patches, low, high, this.validationStatusMap);
     }
 
     @Override
