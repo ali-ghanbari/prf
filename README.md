@@ -104,6 +104,7 @@ in the `pom.xml` of the target project.
 
         <!-- <flOptions>OFF</flOptions>                                             -->
         <!-- <flStrategy>OCHIAI</flStrategy>                                        -->
+        <!-- <cgOptions>OFF</cgOptions>                                             -->
         <!-- <testCoverage>false</testCoverage>                                     -->
         <!-- <failingTests>                                                         -->
         <!--    <failingTest>fully.qualified.test.Class1::testMethod1</failingTest> -->
@@ -140,12 +141,15 @@ in the `pom.xml` of the target project.
         <!-- </patchPrioritizationPlugin>                                           -->
 
 <!-- ****************************** GENERAL OPTIONS ******************************* -->
-
-        <!-- <whiteListPrefix>${project.groupId}</whiteListPrefix>                  -->
+        <!-- <targetClasses>                                                        -->
+        <!--    <param>${project.groupId}.*</param>                                 -->
+        <!-- </targetClasses>                                                       -->
+        <!-- <excludedClasses> </excludedClasses>                                   -->
         <!-- <targetTests>                                                          -->
-        <!--    <targetTest>{whiteListPrefix}.*Test</targetTest>                    -->
-        <!--    <targetTest>{whiteListPrefix}.*Tests</targetTest>                   -->
+        <!--    <param>{whiteListPrefix}.*Test</param>                              -->
+        <!--    <param>{whiteListPrefix}.*Tests</param>                             -->
         <!-- </targetTests>                                                         -->
+        <!-- <excludedTests> </excludedTests>                                       -->
         <!-- <childJVMArgs>                                                         -->
         <!--     <childJVMArg>-Xmx16g</childJVMArg>                                 -->
         <!--     ...                                                                -->
@@ -193,6 +197,15 @@ values for each program element. APR prototype developers can extend PRF with mo
 suspiciousness calculation formulae. Please refer to our JavaDoc shipped with the
 source code for more details. It is worth noting that this parameter will make sense
 only when fault localization is not off.
+
+Using the parameter `<cgOptions>` the user can choose the call-graph analysis they
+desire. By default, this parameter is set to `OFF` meaning that no call-graph analysis
+shall take place. The parameter can take other values, e.g., `DYNAMIC`
+(to do dynamic analysis), `CHA` (to do static class hierarchy analysis), `RTA`
+(tom do static rapid type analysis), or `ZERO_CFA` (to do static 0-CFA analysis).
+Please note that the values `CHA`, `RTA`, and `ZERO_CFA` will make PRF to fork a
+thread alongside the profiler to do the static analysis. In case `DYNAMIC` is used,
+dynamic call-graph analysis shall be done during profiling.
 
 Using `<testCoverage>` the user can determine whether any coverage information should
 be passed to other components. If true, and fault localization is off, line-level
@@ -290,10 +303,13 @@ patch generation plugin, and we don't feel it is necessary to repeat explaining 
 procedure here.
 
 #### General/System-wide Options
-PRF uses groupId of the target project to identify the application classes of
-the target project during profiling, patch validation, and fix report generation.
-This default action can be customized via the tag `<whiteListPrefix>`. The user
-can write their desired prefix of classes to be considered as application classes.
+PRF uses regular expressions to identify the application classes of the target
+project during profiling, patch validation, and fix report generation.
+The user can add arbitrarily many regular expressions to target as many application
+classes as they desire. By default, `${project.groupId}.*` shall be used
+as the only regular expression in `<targetClasses>`. The user can exclude some
+application classes with the help of `<excludeClasses>`, thereby achieving desired
+precision in specifying application classes.
 
 Last but not least, since test cases of some large and complex projects might
 be demanding, we have provided the user with a mechanism through which they
