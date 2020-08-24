@@ -146,8 +146,8 @@ in the `pom.xml` of the target project.
         <!-- </targetClasses>                                                       -->
         <!-- <excludedClasses> </excludedClasses>                                   -->
         <!-- <targetTests>                                                          -->
-        <!--    <param>{whiteListPrefix}.*Test</param>                              -->
-        <!--    <param>{whiteListPrefix}.*Tests</param>                             -->
+        <!--    <param>${project.groupId}.*Test</param>                             -->
+        <!--    <param>${project.groupId}.*Tests</param>                            -->
         <!-- </targetTests>                                                         -->
         <!-- <excludedTests> </excludedTests>                                       -->
         <!-- <childJVMArgs>                                                         -->
