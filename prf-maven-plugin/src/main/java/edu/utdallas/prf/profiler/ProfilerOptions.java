@@ -20,6 +20,7 @@ package edu.utdallas.prf.profiler;
  * #L%
  */
 
+import edu.utdallas.prf.profiler.cg.CGOptions;
 import edu.utdallas.prf.profiler.fl.FLOptions;
 import edu.utdallas.prf.profiler.fl.FLStrategy;
 import org.apache.commons.lang3.Validate;
@@ -38,12 +39,16 @@ public class ProfilerOptions implements Serializable {
 
     final FLStrategy flStrategy;
 
+    final CGOptions cgOptions;
+
     public ProfilerOptions(final boolean collectCoverage,
                            final FLOptions flOptions,
-                           final FLStrategy flStrategy) {
+                           final FLStrategy flStrategy,
+                           final CGOptions cgOptions) {
         Validate.isTrue(flStrategy == null || flStrategy instanceof Serializable);
         this.collectCoverage = collectCoverage;
         this.flOptions = flOptions;
         this.flStrategy = flStrategy;
+        this.cgOptions = cgOptions;
     }
 }

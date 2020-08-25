@@ -222,6 +222,7 @@ public class AbstractPRFMojo extends AbstractMojo {
                     .withCollectCoverage(this.testCoverage)
                     .withFLOptions(this.flOptions)
                     .withFLStrategy(this.flStrategyImpl)
+                    .withCGOptions(this.cgOptions)
                     .withTestClassFilter(this.testClassFilter)
                     .withParallelismDegree(this.parallelism)
                     .withPatchGenerationPlugin(this.patchGenerationPluginImpl)
