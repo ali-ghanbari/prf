@@ -82,7 +82,7 @@ public class ClassLevelCovRecTransformer extends CovRecTransformer {
         @Override
         public MethodVisitor visitMethod(int access, String name, String descriptor, String signature, String[] exceptions) {
             final MethodVisitor defaultMethodVisitor = super.visitMethod(access, name, descriptor, signature, exceptions);
-            if (this.isInterface || Modifier.isAbstract(access) || Modifier.isNative(access) || "<clinit>".equals(name)) {
+            if (this.isInterface || Modifier.isAbstract(access) || Modifier.isNative(access)) {
                 return defaultMethodVisitor;
             }
             return new CLCovRecMethodVisitor(defaultMethodVisitor, access, name, descriptor);
