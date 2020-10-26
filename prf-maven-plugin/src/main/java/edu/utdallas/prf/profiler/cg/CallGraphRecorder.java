@@ -27,13 +27,13 @@ import edu.utdallas.prf.commons.relational.MethodsDom;
 
 import java.util.Iterator;
 
-import static edu.utdallas.memo.constants.ConstParams.UNIT_SIZE;
-
 /**
  *
  * @author Ali Ghanbari (ali.ghanbari@utdallas.edu)
  */
 public final class CallGraphRecorder {
+    private static final int UNIT_SIZE = 1024;
+
     private static final IntStack CALL_STACK;
 
     private static long mainThreadId;

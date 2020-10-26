@@ -20,13 +20,13 @@ package edu.utdallas.prf.maven;
  * #L%
  */
 
-import edu.utdallas.memo.commons.functional.PredicateFactory;
 import edu.utdallas.prf.DummyPatchGenerationPlugin;
 import edu.utdallas.prf.DummyPatchPrioritizationPlugin;
 import edu.utdallas.prf.PRFEntryPoint;
 import edu.utdallas.prf.PRFPluginBase;
 import edu.utdallas.prf.PatchGenerationPlugin;
 import edu.utdallas.prf.PatchPrioritizationPlugin;
+import edu.utdallas.prf.commons.functional.PredicateFactory;
 import edu.utdallas.prf.commons.misc.MemberNameUtils;
 import edu.utdallas.prf.commons.misc.PropertyUtils;
 import edu.utdallas.prf.profiler.cg.CGOptions;

@@ -20,7 +20,7 @@ package edu.utdallas.prf.commons.relational;
  * #L%
  */
 
-import edu.utdallas.memo.commons.collections.NonNegativeIntSet;
+import edu.utdallas.prf.commons.collections.NonNegativeIntSet;
 import edu.utdallas.relational.Domain;
 import edu.utdallas.relational.IntPair;
 import edu.utdallas.relational.Relation;
@@ -31,8 +31,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static edu.utdallas.memo.constants.ConstParams.UNIT_SIZE;
-
 /**
  * A BDD-based <code>String</code>-typed binary relation.
  * A default BDD variable order of D0xD1 is adopted is adopted
@@ -41,6 +39,8 @@ import static edu.utdallas.memo.constants.ConstParams.UNIT_SIZE;
  */
 public class BinaryRelation implements Serializable {
     private static final long serialVersionUID = 1L;
+
+    private static final int UNIT_SIZE = 1024;
 
     protected final Relation relation;
 
