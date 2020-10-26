@@ -69,7 +69,7 @@
 	  <patchGenerationPlugin>
 	    <name>capgen</name>
 	    <parameters>
-            <launcherJDKHomeDirectory>/Library/Java/JavaVirtualMachines/jdk1.8.0_231.jdk/Contents/Home</launcherJDKHomeDirectory>
+            <launcherJDKHomeDirectory>/opt/jdk1.8.0_251</launcherJDKHomeDirectory>
             <subject>Chart</subject>
 	      <bugId>1</bugId>
 	    </parameters>
