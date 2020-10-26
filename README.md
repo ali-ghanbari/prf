@@ -47,17 +47,17 @@ section and make sure you have at least Maven, Git, JDK 1.7
 the core part of our CapGen plugin) installed on your computer
 and the environment variable `JAVA_HOME` is pointing to the
 installation patch of JDK 1.7. For example, on Unix machine that
-I am using, JDK 1.7 is installed under `/Library/Java/JavaVirtualMachines/jdk1.7.0_80.jdk/Contents/Home`.
+I am using, JDK 1.7 is installed under `/opt/jdk1.7.0_80`.
 So, I use the following command to set `JAVA_HOME` variable. 
 ```shell script
-export JAVA_HOME=/Library/Java/JavaVirtualMachines/jdk1.7.0_80.jdk/Contents/Home
+export JAVA_HOME=/opt/jdk1.7.0_80
 ```
 After this, when I run the command `mvn -ver`, I see something like
 the following
 ```text
 Apache Maven 3.5.4 (1edded0938998edf8bf061f1ceb3cfdeccf443fe; 2018-06-17T13:33:14-05:00)
 Maven home: /opt/apache-maven-3.5.4
-Java version: 1.7.0_80, vendor: Oracle Corporation, runtime: /Library/Java/JavaVirtualMachines/jdk1.7.0_80.jdk/Contents/Home/jre
+Java version: 1.7.0_80, vendor: Oracle Corporation, runtime: /opt/jdk1.7.0_80/jre
 Default locale: en_US, platform encoding: UTF-8
 OS name: "mac os x", version: "10.15.5", arch: "x86_64", family: "mac"
 ```
